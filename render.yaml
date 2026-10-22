@@ -1,0 +1,24 @@
+# Render.com Blueprint — ModDeck (Next.js 16, standalone output)
+#
+# This file lets Render provision the web service automatically:
+#   * Push this repo to GitHub, then on render.com choose
+#     "New +" → "Blueprint" and pick the repo, OR
+#   * visit https://render.com/deploy?repo=<your-github-repo-url>
+#
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: moddeck
+    runtime: node
+    plan: free # upgrade to "starter" ($7/mo) for always-on, no sleep
+    healthCheckPath: /
+    # --include=dev guarantees dev dependencies install even if
+    # NODE_ENV=production is present in the build environment
+    buildCommand: npm install --include=dev --legacy-peer-deps && npm run build
+    # Next.js standalone server — binds to Render's injected PORT
+    startCommand: NODE_ENV=production node .next/standalone/server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOSTNAME
+        value: 0.0.0.0

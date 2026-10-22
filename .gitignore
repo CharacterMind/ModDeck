@@ -1,2 +1,37 @@
-skills/
+# dependencies
 node_modules/
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+/coverage
+
+# skills + scaffold (not part of the app)
+/skills/
+
+# platform runtime files
+.zscripts/
+.initial_snapshot.json
+.data/
+dev.log
+*.log
+tool-results/
+
+# databases
+/db/*.db
+/db/*.db-journal
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+.claude
+.z-ai-config
+test
+prompt
