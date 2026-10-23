@@ -6,7 +6,7 @@
 # ============================================================
 
 # ---- where your ModDeck site lives (no trailing slash) ----
-$Site = "https://SITE-URL-HERE.onrender.com"
+$Site = "https://moddeck-uxeq.onrender.com"
 
 # ---- games ModDeck supports (matched against running processes) ----
 $Games = @(
