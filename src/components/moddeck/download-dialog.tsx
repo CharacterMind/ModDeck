@@ -156,6 +156,31 @@ export function DownloadDialog() {
                   </span>
                   <Rocket className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
                 </button>
+
+                {/* Real Windows companion — detects running games */}
+                <a
+                  href="/companion/ModDeck-Companion.zip"
+                  download
+                  className="group mt-3 flex w-full items-center gap-4 rounded-xl border border-white/10 bg-panel/60 p-4 text-left transition-all hover:border-primary/50 hover:bg-panel"
+                  aria-label="Download ModDeck Companion for Windows"
+                >
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/15">
+                    <Monitor className="h-6 w-6 text-primary" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[15px] font-black text-foreground">
+                      ModDeck Companion{" "}
+                      <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 align-middle text-[9px] font-black tracking-wider text-primary">
+                        WINDOWS
+                      </span>
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      Detects your running game — press Play, get the trainer. 3 KB.
+                    </span>
+                  </span>
+                  <Rocket className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-y-0.5" />
+                </a>
+
                 <p className="mt-3 flex items-start gap-1.5 text-[10px] leading-relaxed text-muted-foreground">
                   <Info className="mt-px h-3 w-3 shrink-0" />
                   ModDeck installs as a real desktop app (PWA): your browser handles the install

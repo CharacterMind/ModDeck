@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Gamepad2 } from "lucide-react";
 import { Toaster } from "sonner";
 import { Shell } from "@/components/moddeck/shell";
@@ -36,6 +36,19 @@ export default function Page() {
     () => false
   );
   const view = useModDeck((s) => s.view);
+  const openTrainer = useModDeck((s) => s.openTrainer);
+
+  /* Companion deep link: /?game=<slug> opens that trainer directly.
+     The ModDeck Companion desktop app sends players here on [P]. */
+  useEffect(() => {
+    try {
+      const slug = new URLSearchParams(window.location.search).get("game");
+      if (slug) openTrainer(slug);
+    } catch {
+      /* ignore malformed params */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!mounted) return <Splash />;
 
