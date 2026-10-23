@@ -35,3 +35,12 @@ next-env.d.ts
 .z-ai-config
 test
 prompt
+
+# local-only files (never deploy)
+/.env
+/download/
+/upload/
+/worklog.md
+/examples/
+/mini-services/
+/tests/
