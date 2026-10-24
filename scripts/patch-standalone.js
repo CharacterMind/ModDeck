@@ -15,6 +15,6 @@ if (content.includes('__HOSTNAME_PATCHED__')) {
   process.exit(0);
 }
 
-content = `// __HOSTNAME_PATCHED__\nprocess.env.HOSTNAME = process.env.HOSTNAME || '0.0.0.0';\n` + content;
+content = `// __HOSTNAME_PATCHED__\nprocess.env.HOSTNAME = '0.0.0.0';\n` + content;
 fs.writeFileSync(serverPath, content);
 console.log('Patched standalone/server.js: HOSTNAME defaults to 0.0.0.0');
