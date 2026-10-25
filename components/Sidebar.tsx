@@ -3,6 +3,7 @@
 import { useStore } from '@/lib/store';
 import { GAMES } from '@/data/games';
 import { useCompanion } from '@/hooks/useCompanion';
+import { CHANGELOG } from '@/data/changelog';
 
 const NAV = [
   { id: 'home', label: 'Trainers', icon: '🎃' },
@@ -25,9 +26,10 @@ function getInitials(name: string): string {
 interface Props {
   companion: ReturnType<typeof useCompanion>;
   onWhatsNew: () => void;
+  hasUnreadWN?: boolean;
 }
 
-export default function Sidebar({ companion, onWhatsNew }: Props) {
+export default function Sidebar({ companion, onWhatsNew, hasUnreadWN }: Props) {
   const { view, setView, selectedGameId, setSelectedGame, myGameIds, user } = useStore();
 
   const myGames = GAMES.filter(g => myGameIds.includes(g.id));
@@ -166,7 +168,14 @@ export default function Sidebar({ companion, onWhatsNew }: Props) {
         >
           <span className="text-base leading-none">🆕</span>
           <span className="font-medium">What&apos;s New</span>
-          <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FF6B00', color: '#000' }}>V330</span>
+          <span className="ml-auto flex items-center gap-1">
+            {hasUnreadWN && (
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#e53030' }} />
+            )}
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FF6B00', color: '#000' }}>
+              {CHANGELOG[0]?.version ?? 'V1'}
+            </span>
+          </span>
         </button>
         <button
           onClick={() => setView('settings')}
