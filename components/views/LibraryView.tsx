@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
-import { GAMES } from '@/data/games';
+import { GAMES, GENRES } from '@/data/games';
 import { useCompanion } from '@/hooks/useCompanion';
 
 interface Props {
@@ -12,11 +12,14 @@ interface Props {
 export default function LibraryView({ companion }: Props) {
   const { setView, setSelectedGame, myGameIds, addMyGame, removeMyGame } = useStore();
   const [search, setSearch] = useState('');
+  const [genre, setGenre] = useState('All');
   const installedIds = new Set(companion.installed.map(i => i.gameId));
 
-  const filtered = GAMES.filter(g =>
-    g.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = GAMES.filter(g => {
+    const matchesSearch = g.name.toLowerCase().includes(search.toLowerCase());
+    const matchesGenre = genre === 'All' || g.genre === genre;
+    return matchesSearch && matchesGenre;
+  });
 
   function openTrainer(id: string) {
     setSelectedGame(id);
@@ -29,7 +32,7 @@ export default function LibraryView({ companion }: Props) {
       <div className="p-6 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,107,0,0.1)' }}>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-white">📖 Grimoire</h1>
-          <div className="text-sm" style={{ color: 'rgba(255,107,0,0.45)' }}>{GAMES.length} spells</div>
+          <div className="text-sm" style={{ color: 'rgba(255,107,0,0.45)' }}>{GAMES.length} trainers</div>
         </div>
         <input
           type="text"
@@ -43,10 +46,32 @@ export default function LibraryView({ companion }: Props) {
             color: 'white',
           }}
         />
+
+        {/* Genre filter chips */}
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {GENRES.map(g => (
+            <button
+              key={g}
+              onClick={() => setGenre(g)}
+              className="text-xs px-3 py-1 rounded-full transition-all"
+              style={genre === g ? {
+                background: '#FF6B00',
+                color: '#000',
+                fontWeight: 600,
+              } : {
+                background: 'rgba(255,107,0,0.08)',
+                border: '1px solid rgba(255,107,0,0.15)',
+                color: 'rgba(255,140,66,0.6)',
+              }}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Installed section */}
-      {companion.installed.length > 0 && !search && (
+      {companion.installed.length > 0 && !search && genre === 'All' && (
         <div className="px-6 pt-4 flex-shrink-0">
           <div className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,107,0,0.4)' }}>
             🕷️ Detected on your PC ({companion.installed.length})
@@ -98,10 +123,18 @@ export default function LibraryView({ companion }: Props) {
                 />
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openTrainer(game.id)}>
                   <div className="text-white text-sm font-medium">{game.name}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{game.cheats.length} spells</span>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ background: 'rgba(255,107,0,0.1)', color: 'rgba(255,140,66,0.7)' }}
+                    >
+                      {game.genre}
+                    </span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{game.cheats.length} cheats</span>
                     <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
-                    <span className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.3)' }}>{game.platform}</span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>⭐ {game.rating}</span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>👥 {game.players}</span>
                     {installed && (
                       <>
                         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
@@ -144,7 +177,7 @@ export default function LibraryView({ companion }: Props) {
           {filtered.length === 0 && (
             <div className="text-center py-16" style={{ color: 'rgba(255,255,255,0.25)' }}>
               <div className="text-3xl mb-2">🕸️</div>
-              <div className="text-sm">No spells found for "{search}"</div>
+              <div className="text-sm">No trainers found{search ? ` for "${search}"` : ` in ${genre}`}</div>
             </div>
           )}
         </div>
