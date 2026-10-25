@@ -86,7 +86,12 @@ export default function TrainerView({ companion }: Props) {
   ];
 
   async function handleLaunch() {
-    if (!companion.isOnline) return;
+    if (!companion.isOnline) {
+      if (g.steamAppId) {
+        window.open(`steam://rungameid/${g.steamAppId}`);
+      }
+      return;
+    }
     setIsLaunching(true);
     setLaunchStep(0);
 
@@ -254,21 +259,13 @@ export default function TrainerView({ companion }: Props) {
               </div>
               <button
                 onClick={handleLaunch}
-                disabled={!companion.isOnline}
                 className="flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition-all text-sm"
-                style={companion.isOnline ? {
-                  background: '#FF6B00',
-                  color: '#000',
-                  boxShadow: '0 0 15px rgba(255,107,0,0.35)',
-                } : {
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'rgba(255,255,255,0.25)',
-                }}
+                style={{ background: '#FF6B00', color: '#000', boxShadow: '0 0 15px rgba(255,107,0,0.35)' }}
               >
-                🎃 Summon game
+                ▶ Play {g.name}
               </button>
               {!companion.isOnline && (
-                <p className="text-xs" style={{ color: 'rgba(255,107,0,0.35)' }}>Start the ModDeck Companion first</p>
+                <p className="text-xs" style={{ color: 'rgba(255,107,0,0.35)' }}>Companion offline — will launch via Steam directly</p>
               )}
             </div>
           )}
