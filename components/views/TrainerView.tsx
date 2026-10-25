@@ -181,9 +181,8 @@ export default function TrainerView({ companion }: Props) {
   async function handleButton(cheat: Cheat) {
     if (isAtLimit || !companion.isAttached) return;
     if (cheat.proOnly && !isPro) return;
-    // Button cheats trigger a preset write
+    // Button cheats: scan for current value first, then write desired value
     setScanCheat(cheat.id);
-    setScanStep('write');
     setScanValue(String(cheat.defaultValue ?? 10000));
     setScanMsg(`Enter your CURRENT ${cheat.label.toLowerCase()} value to locate it`);
     setScanStep('first');
