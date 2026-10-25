@@ -38,7 +38,7 @@ export default function Sidebar({ companion }: Props) {
   }
 
   return (
-    <aside className="w-[160px] flex-shrink-0 border-r flex flex-col select-none" style={{ background: '#0f0800', borderColor: 'rgba(255,107,0,0.12)' }}>
+    <aside className="w-[160px] flex-shrink-0 border-r flex flex-col select-none" style={{ width: '160px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#0f0800', borderColor: 'rgba(255,107,0,0.12)', borderRightWidth: '1px', borderRightStyle: 'solid' }}>
       {/* Logo */}
       <div className="px-4 py-4 border-b" style={{ borderColor: 'rgba(255,107,0,0.12)' }}>
         <div className="flex items-center gap-2">

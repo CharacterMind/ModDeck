@@ -29,7 +29,7 @@ export const GAMES: Game[] = [
   {
     id: 'supermarket-together',
     name: 'Supermarket Together',
-    steamAppId: 1134870,
+    steamAppId: 2791900,
     platform: 'steam',
     processes: ['SupermarketTogether.exe'],
     coverUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1134870/library_600x900.jpg',

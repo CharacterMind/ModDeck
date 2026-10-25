@@ -47,10 +47,10 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0a] text-white overflow-hidden">
-      <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#0a0a0a] text-white overflow-hidden" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0a0a0a' }}>
+      <div className="flex flex-1 overflow-hidden" style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
         <Sidebar companion={companion} />
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
           {view === 'home' && <HomeView companion={companion} />}
           {view === 'library' && <LibraryView companion={companion} />}
           {view === 'trainer' && <TrainerView companion={companion} />}
