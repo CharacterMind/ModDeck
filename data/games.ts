@@ -23,6 +23,24 @@ export interface Game {
 
 export const GAMES: Game[] = [
   {
+    id: 'supermarket-together',
+    name: 'Supermarket Together',
+    steamAppId: 1979840,
+    platform: 'steam',
+    processes: ['SupermarketTogether.exe'],
+    coverUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1979840/library_600x900.jpg',
+    heroUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1979840/header.jpg',
+    accentColor: '#e8820c',
+    genre: 'Co-op Sim',
+    cheats: [
+      { id: 'unlimited-money', label: 'Unlimited Money', description: 'Money never decreases', category: 'ECONOMY', hotkey: 'F1', type: 'toggle' },
+      { id: 'set-money', label: 'Set Money', description: 'Set your balance to any amount', category: 'ECONOMY', type: 'value', defaultValue: 1000000 },
+      { id: 'add-10k', label: 'Add $10,000', description: 'Instant cash injection', category: 'ECONOMY', hotkey: 'F2', type: 'button' },
+      { id: 'fast-restock', label: 'Fast Restock', description: 'Delivery trucks arrive instantly', category: 'STORE', hotkey: 'F3', type: 'toggle' },
+      { id: 'no-customer-complaints', label: 'No Complaints', description: 'Customers are always satisfied', category: 'STORE', hotkey: 'F4', type: 'toggle' },
+    ],
+  },
+  {
     id: 'supermarket-simulator',
     name: 'Supermarket Simulator',
     steamAppId: 2670630,

@@ -37,13 +37,13 @@ export default function SettingsView() {
   return (
     <div style={{ height: '100%', overflowY: 'auto', padding: '40px' }}>
       <div style={{ maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'white', margin: 0 }}>🕷️ Settings</h2>
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'white', margin: 0 }}>Settings</h2>
 
         {/* Avatar */}
         <div>
           <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginBottom: '12px' }}>Profile Picture</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, background: '#FF6B00', boxShadow: '0 0 15px rgba(255,107,0,0.4)' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, background: '#7c5cfc', boxShadow: '0 0 15px rgba(124,92,252,0.4)' }}>
               {user?.avatarUrl
                 ? <img src={user.avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : <span style={{ color: 'black', fontWeight: 900, fontSize: '20px' }}>{initials}</span>}
@@ -70,14 +70,14 @@ export default function SettingsView() {
             value={name}
             onChange={e => setName(e.target.value)}
             maxLength={32}
-            style={{ width: '100%', borderRadius: '12px', padding: '10px 16px', color: 'white', fontSize: '14px', outline: 'none', background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.15)', boxSizing: 'border-box' }}
+            style={{ width: '100%', borderRadius: '12px', padding: '10px 16px', color: 'white', fontSize: '14px', outline: 'none', background: 'rgba(124,92,252,0.06)', border: '1px solid rgba(124,92,252,0.15)', boxSizing: 'border-box' }}
           />
           <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)', marginTop: '4px' }}>How you appear in ModDeck. Change anytime.</div>
         </div>
 
         <button
           onClick={handleSave}
-          style={{ padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', alignSelf: 'flex-start', background: saved ? 'rgba(74,222,128,0.15)' : '#FF6B00', color: saved ? '#4ade80' : '#000', boxShadow: saved ? '0 0 0 1px rgba(74,222,128,0.25)' : 'none' }}
+          style={{ padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', alignSelf: 'flex-start', background: saved ? 'rgba(0,201,79,0.12)' : '#7c5cfc', color: saved ? '#00c94f' : 'white', boxShadow: saved ? '0 0 0 1px rgba(74,222,128,0.25)' : 'none' }}
         >
           {saved ? '✓ Saved' : 'Save changes'}
         </button>

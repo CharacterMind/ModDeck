@@ -1,17 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #f5f0e8;
-  --orange: #FF6B00;
-  --orange-light: #FF8C42;
-  --orange-dim: rgba(255, 107, 0, 0.15);
-  --glow-orange: 0 0 20px rgba(255, 107, 0, 0.3);
+  --bg: #0d0d12;
+  --bg2: #13131c;
+  --bg3: #1a1a28;
+  --accent: #7c5cfc;
+  --accent-dim: rgba(124, 92, 252, 0.15);
+  --green: #00c94f;
+  --border: rgba(124, 92, 252, 0.12);
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --background: #0d0d12;
+  --foreground: #ffffff;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3a2010 transparent;
+  scrollbar-color: rgba(124, 92, 252, 0.2) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -21,40 +26,15 @@
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: #3a2010;
+  background: rgba(124, 92, 252, 0.2);
   border-radius: 2px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: #FF6B00;
+  background: #7c5cfc;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-}
-
-@keyframes flicker {
-  0%, 100% { opacity: 1; }
-  92% { opacity: 1; }
-  93% { opacity: 0.8; }
-  94% { opacity: 1; }
-  96% { opacity: 0.9; }
-  97% { opacity: 1; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-}
-
-.halloween-glow {
-  text-shadow: 0 0 10px rgba(255, 107, 0, 0.6);
-}
-
-.pumpkin-glow {
-  box-shadow: 0 0 15px rgba(255, 107, 0, 0.4), 0 0 30px rgba(255, 107, 0, 0.15);
-}
-
-.spooky-border {
-  border-color: rgba(255, 107, 0, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
