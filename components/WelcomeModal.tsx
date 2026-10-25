@@ -11,10 +11,6 @@ export default function WelcomeModal({ onComplete }: Props) {
   const [name, setName] = useState('');
   const [animating, setAnimating] = useState(false);
 
-  function handleStart() {
-    setStep('name');
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = name.trim();
@@ -25,86 +21,53 @@ export default function WelcomeModal({ onComplete }: Props) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-500 ${animating ? 'opacity-0' : 'opacity-100'}`}
-      style={{ background: 'rgba(0,0,0,0.85)' }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)',
+        opacity: animating ? 0 : 1, transition: 'opacity 0.5s',
+      }}
     >
-      <div className="w-full max-w-md mx-4">
+      <div style={{ width: '100%', maxWidth: '400px', margin: '0 16px' }}>
         {step === 'welcome' ? (
-          <div
-            className="rounded-2xl p-8 text-center space-y-6 shadow-2xl"
-            style={{
-              background: '#0f0800',
-              border: '1px solid rgba(255,107,0,0.2)',
-              boxShadow: '0 0 40px rgba(255,107,0,0.1)',
-            }}
-          >
-            {/* Logo */}
-            <div className="flex justify-center">
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
-                style={{
-                  background: '#FF6B00',
-                  boxShadow: '0 0 30px rgba(255,107,0,0.5)',
-                }}
-              >
+          <div style={{ borderRadius: '16px', padding: '32px', textAlign: 'center', background: '#0f0800', border: '1px solid rgba(255,107,0,0.2)', boxShadow: '0 0 40px rgba(255,107,0,0.1)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', background: '#FF6B00', boxShadow: '0 0 30px rgba(255,107,0,0.5)' }}>
                 🎃
               </div>
             </div>
-
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Enter ModDeck 🕸️</h1>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                The free, open alternative to WeMod. Cast real trainer spells — powered by a local companion that runs on your PC.
+              <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'white', margin: '0 0 8px' }}>Enter ModDeck 🕸️</h1>
+              <p style={{ fontSize: '14px', lineHeight: 1.5, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+                Free game trainer for Supermarket Together. Cast real cheats — powered by a local companion that runs on your PC.
               </p>
             </div>
-
-            {/* Feature highlights */}
-            <div className="space-y-3 text-left">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
               {[
-                { icon: '🎮', text: 'Launch & haunt your Steam games directly' },
-                { icon: '🍬', text: '50 Candy Points on us to get you started' },
-                { icon: '⏱️', text: '5 free hours per game — no soul required' },
-                { icon: '💀', text: 'Join the Coven for unlimited time & 10x CP' },
+                { icon: '🎮', text: 'Launch & attach to Supermarket Together directly' },
+                { icon: '🔮', text: 'Real-time cheats — funds, franchise level, god mode' },
+                { icon: '👻', text: 'No account required. No credit card. No soul-selling.' },
               ].map((f, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3"
-                  style={{ background: 'rgba(255,107,0,0.07)', border: '1px solid rgba(255,107,0,0.12)' }}
-                >
-                  <span className="text-lg">{f.icon}</span>
-                  <span className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>{f.text}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRadius: '12px', padding: '12px 16px', background: 'rgba(255,107,0,0.07)', border: '1px solid rgba(255,107,0,0.12)' }}>
+                  <span style={{ fontSize: '18px' }}>{f.icon}</span>
+                  <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.65)' }}>{f.text}</span>
                 </div>
               ))}
             </div>
-
             <button
-              onClick={handleStart}
-              className="w-full font-bold py-3.5 rounded-xl transition-all text-sm"
-              style={{ background: '#FF6B00', color: '#000', boxShadow: '0 0 20px rgba(255,107,0,0.4)' }}
+              onClick={() => setStep('name')}
+              style={{ width: '100%', fontWeight: 700, padding: '14px', borderRadius: '12px', fontSize: '14px', background: '#FF6B00', color: '#000', border: 'none', cursor: 'pointer', boxShadow: '0 0 20px rgba(255,107,0,0.4)' }}
             >
               Begin Your Haunting 🕯️
             </button>
-
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
-              No account required · No credit card · No soul-selling
-            </p>
           </div>
         ) : (
-          <div
-            className="rounded-2xl p-8 space-y-6 shadow-2xl"
-            style={{
-              background: '#0f0800',
-              border: '1px solid rgba(255,107,0,0.2)',
-              boxShadow: '0 0 40px rgba(255,107,0,0.1)',
-            }}
-          >
-            <div className="text-center">
-              <div className="text-3xl mb-3">🦇</div>
-              <h2 className="text-xl font-bold text-white">What shall we call you?</h2>
-              <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>You can change this anytime in Settings</p>
+          <div style={{ borderRadius: '16px', padding: '32px', background: '#0f0800', border: '1px solid rgba(255,107,0,0.2)', boxShadow: '0 0 40px rgba(255,107,0,0.1)', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '32px', marginBottom: '12px' }}>🦇</div>
+              <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'white', margin: '0 0 4px' }}>What shall we call you?</h2>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)', margin: 0 }}>You can change this anytime in Settings</p>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <input
                 type="text"
                 value={name}
@@ -112,41 +75,16 @@ export default function WelcomeModal({ onComplete }: Props) {
                 placeholder="Your name or gamer tag"
                 autoFocus
                 maxLength={32}
-                className="w-full rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none transition-all text-sm"
-                style={{
-                  background: 'rgba(255,107,0,0.06)',
-                  border: '1px solid rgba(255,107,0,0.2)',
-                }}
+                style={{ width: '100%', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none', background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.2)', boxSizing: 'border-box' }}
               />
-
               <button
                 type="submit"
                 disabled={!name.trim()}
-                className="w-full font-bold py-3.5 rounded-xl transition-all text-sm"
-                style={name.trim() ? {
-                  background: '#FF6B00',
-                  color: '#000',
-                  boxShadow: '0 0 20px rgba(255,107,0,0.4)',
-                } : {
-                  background: 'rgba(255,255,255,0.08)',
-                  color: 'rgba(255,255,255,0.25)',
-                }}
+                style={{ width: '100%', fontWeight: 700, padding: '14px', borderRadius: '12px', fontSize: '14px', border: 'none', cursor: name.trim() ? 'pointer' : 'default', background: name.trim() ? '#FF6B00' : 'rgba(255,255,255,0.08)', color: name.trim() ? '#000' : 'rgba(255,255,255,0.25)', boxShadow: name.trim() ? '0 0 20px rgba(255,107,0,0.4)' : 'none' }}
               >
                 {name.trim() ? `Into the darkness, ${name.trim().split(' ')[0]}! 🎃` : 'Enter your name to continue'}
               </button>
             </form>
-
-            {/* Candy Points gift */}
-            <div
-              className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.2)' }}
-            >
-              <span className="text-xl">🍬</span>
-              <div>
-                <div className="font-semibold text-sm" style={{ color: '#FF8C42' }}>50 Candy Points on us</div>
-                <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Your welcome treat is ready to claim</div>
-              </div>
-            </div>
           </div>
         )}
       </div>

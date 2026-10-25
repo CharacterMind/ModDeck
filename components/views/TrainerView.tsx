@@ -1,19 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { useCompanion } from '@/hooks/useCompanion';
-import { GAMES, Game, Cheat } from '@/data/games';
+import { GAMES, Cheat } from '@/data/games';
 
 interface Props {
   companion: ReturnType<typeof useCompanion>;
 }
 
-type CheatState = 'idle' | 'active' | 'scanning_first' | 'scanning_next' | 'ready';
-
 export default function TrainerView({ companion }: Props) {
-  const { selectedGameId, user, startSession, endSession, getSessionMinutes, spendDeckPoints, setView } = useStore();
-  const game = GAMES.find(g => g.id === selectedGameId);
+  const { selectedGameId } = useStore();
+  const game = GAMES.find(g => g.id === selectedGameId) ?? GAMES[0];
 
   const [isLaunching, setIsLaunching] = useState(false);
   const [launchStep, setLaunchStep] = useState(0);
@@ -24,17 +22,7 @@ export default function TrainerView({ companion }: Props) {
   const [scanStep, setScanStep] = useState<'first' | 'next' | 'write'>('first');
   const [scanMsg, setScanMsg] = useState('');
   const [valueInputs, setValueInputs] = useState<Record<string, string>>({});
-  const [sessionMinutes, setSessionMinutes] = useState(0);
-  const [bonusMinutes, setBonusMinutes] = useState(0);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const FREE_LIMIT_MINUTES = 5 * 60;
-  const effectiveLimit = FREE_LIMIT_MINUTES + bonusMinutes;
-  const isPro = user?.plan === 'pro';
-  const minutesLeft = effectiveLimit - sessionMinutes;
-  const isAtLimit = !isPro && sessionMinutes >= effectiveLimit;
-
-  // Reset per-game state when switching games
   useEffect(() => {
     setCheatStates({});
     setScanCheat(null);
@@ -44,38 +32,13 @@ export default function TrainerView({ companion }: Props) {
     setValueInputs({});
   }, [selectedGameId]);
 
-  // Sync attached state with companion
   useEffect(() => {
     if (companion.isAttached && companion.attachedGameId === selectedGameId) {
       setIsRunning(true);
     } else if (isRunning) {
       setIsRunning(false);
-      if (!companion.isAttached) endSession();
     }
   }, [companion.isAttached, companion.attachedGameId, selectedGameId]);
-
-  // Session timer
-  useEffect(() => {
-    if (isRunning) {
-      tickRef.current = setInterval(() => {
-        setSessionMinutes(getSessionMinutes());
-      }, 10000);
-    } else {
-      if (tickRef.current) clearInterval(tickRef.current);
-    }
-    return () => { if (tickRef.current) clearInterval(tickRef.current); };
-  }, [isRunning]);
-
-  if (!game) {
-    return (
-      <div className="flex items-center justify-center h-full text-white/30 text-sm">
-        Select a game from the sidebar
-      </div>
-    );
-  }
-
-  // game is now guaranteed non-null below
-  const g = game;
 
   const LAUNCH_STEPS = [
     'Locating game installation',
@@ -87,58 +50,36 @@ export default function TrainerView({ companion }: Props) {
 
   async function handleLaunch() {
     if (!companion.isOnline) {
-      if (g.steamAppId) {
-        window.open(`steam://rungameid/${g.steamAppId}`);
-      }
+      if (game.steamAppId) window.open(`steam://rungameid/${game.steamAppId}`);
       return;
     }
     setIsLaunching(true);
     setLaunchStep(0);
-
-    // Steps 0-2: visual progression
     for (let i = 0; i <= 2; i++) {
       await new Promise(r => setTimeout(r, 600));
       setLaunchStep(i + 1);
     }
-
-    // Actually launch
-    const result = await companion.launch(g.id);
+    const result = await companion.launch(game.id);
     if (!result.started) {
       setIsLaunching(false);
       setScanMsg(result.error ?? 'Failed to launch. Is the game installed?');
       return;
     }
-
     setLaunchStep(3);
-    // Attach (waits up to 18s for the game process)
-    const attach = await companion.attach(g.id, g.processes);
+    const attach = await companion.attach(game.id, game.processes);
     setLaunchStep(4);
-
-    if (attach.found) {
-      setIsRunning(true);
-      startSession(g.id);
-    }
+    if (attach.found) setIsRunning(true);
     setIsLaunching(false);
   }
 
   async function handleToggle(cheat: Cheat) {
-    if (isAtLimit) return;
-    if (cheat.proOnly && !isPro) return;
     if (!companion.isAttached) return;
-
     const current = cheatStates[cheat.id] ?? false;
-
     if (!current) {
-      // Activate: use scan to find and write
-      if (cheat.type === 'toggle') {
-        // For toggle cheats, we use a known value injection pattern
-        // Start with a freeze at max value
-        setScanCheat(cheat.id);
-        setScanStep('first');
-        setScanMsg(`Enter your current ${cheat.label.toLowerCase()} value in-game`);
-      }
+      setScanCheat(cheat.id);
+      setScanStep('first');
+      setScanMsg(`Enter your current ${cheat.label.toLowerCase()} value in-game`);
     } else {
-      // Deactivate: undo
       await companion.scan('undo');
       setCheatStates(s => ({ ...s, [cheat.id]: false }));
     }
@@ -147,28 +88,18 @@ export default function TrainerView({ companion }: Props) {
   async function handleScanSubmit() {
     const val = parseFloat(scanValue);
     if (isNaN(val)) return;
-
     if (scanStep === 'first') {
       const res = await companion.scan('first', val);
       if (res.ok) {
-        if (res.ready) {
-          setScanStep('write');
-          setScanMsg(`Found! Now enter the value you WANT`);
-        } else {
-          setScanStep('next');
-          setScanMsg(`Good. Now change the value in-game, then enter the NEW value`);
-        }
+        if (res.ready) { setScanStep('write'); setScanMsg('Found! Now enter the value you WANT'); }
+        else { setScanStep('next'); setScanMsg('Good. Now change the value in-game, then enter the NEW value'); }
         setScanValue('');
       }
     } else if (scanStep === 'next') {
       const res = await companion.scan('next', val);
       if (res.ok) {
-        if (res.ready) {
-          setScanStep('write');
-          setScanMsg(`Narrowed down! Enter the value you WANT`);
-        } else {
-          setScanMsg(`Still narrowing — change the value again and enter the new one`);
-        }
+        if (res.ready) { setScanStep('write'); setScanMsg('Narrowed down! Enter the value you WANT'); }
+        else setScanMsg('Still narrowing — change the value again and enter the new one');
         setScanValue('');
       }
     } else if (scanStep === 'write') {
@@ -184,9 +115,7 @@ export default function TrainerView({ companion }: Props) {
   }
 
   async function handleButton(cheat: Cheat) {
-    if (isAtLimit || !companion.isAttached) return;
-    if (cheat.proOnly && !isPro) return;
-    // Button cheats: scan for current value first, then write desired value
+    if (!companion.isAttached) return;
     setScanCheat(cheat.id);
     setScanValue(String(cheat.defaultValue ?? 10000));
     setScanMsg(`Enter your CURRENT ${cheat.label.toLowerCase()} value to locate it`);
@@ -194,281 +123,202 @@ export default function TrainerView({ companion }: Props) {
   }
 
   async function handleValueSet(cheat: Cheat) {
-    if (isAtLimit || !companion.isAttached) return;
-    if (cheat.proOnly && !isPro) return;
-    const val = parseFloat(valueInputs[cheat.id] ?? String(cheat.defaultValue ?? 0));
-    if (isNaN(val)) return;
+    if (!companion.isAttached) return;
     setScanCheat(cheat.id);
     setScanStep('first');
     setScanMsg(`Enter your CURRENT ${cheat.label.toLowerCase()} value to locate it first`);
   }
 
-  // Group cheats by category
   const categories = [...new Set(game.cheats.map(c => c.category))];
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       {/* Left: Game hero */}
-      <div className="relative w-[380px] flex-shrink-0 overflow-hidden">
-        {/* Hero background */}
-        <div className="absolute inset-0">
-          <img
-            src={game.heroUrl ?? game.coverUrl}
-            alt={game.name}
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+      <div style={{ position: 'relative', width: '380px', flexShrink: 0, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <img src={game.heroUrl ?? game.coverUrl} alt={game.name} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #0a0a0a, rgba(10,10,10,0.6), transparent)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #0a0a0a, transparent)' }} />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col h-full p-6">
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', height: '100%', padding: '24px' }}>
           {/* Game header */}
-          <div className="flex items-start gap-3 mb-4">
-            <img
-              src={game.coverUrl}
-              alt={game.name}
-              className="w-14 h-14 rounded-lg object-cover shadow-lg flex-shrink-0"
-            />
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+            <img src={game.coverUrl} alt={game.name} style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }} />
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-white font-bold text-lg leading-tight">{game.name}</h1>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,0,0.18)', color: '#FF8C42' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1 style={{ color: 'white', fontWeight: 700, fontSize: '18px', margin: 0 }}>{game.name}</h1>
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px', background: 'rgba(255,107,0,0.18)', color: '#FF8C42' }}>
                   🎃 TRAINER v1.0
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-1 text-xs text-white/40">
-                <span>⭐ 4.8</span>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px', fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+                <span>⭐ {game.rating}</span>
                 <span>·</span>
                 <span>{game.cheats.length} cheats</span>
                 <span>·</span>
-                <span className="capitalize">{game.platform}</span>
+                <span>{game.platform}</span>
               </div>
             </div>
           </div>
 
-          {/* Not running state */}
+          {/* Not running */}
           {!isRunning && !isLaunching && (
-            <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-              <div className="text-4xl">👻</div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '16px' }}>
+              <div style={{ fontSize: '40px' }}>👻</div>
               <div>
-                <div className="text-white font-semibold mb-1">Game not running</div>
-                <div className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <div style={{ color: 'white', fontWeight: 600, marginBottom: '4px' }}>Game not running</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>
                   Summon {game.name} to attach the trainer and cast spells in real time
                 </div>
               </div>
               <button
                 onClick={handleLaunch}
-                className="flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition-all text-sm"
-                style={{ background: '#FF6B00', color: '#000', boxShadow: '0 0 15px rgba(255,107,0,0.35)' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, padding: '12px 24px', borderRadius: '12px', fontSize: '14px', background: '#FF6B00', color: '#000', border: 'none', cursor: 'pointer', boxShadow: '0 0 15px rgba(255,107,0,0.35)' }}
               >
-                ▶ Play {g.name}
+                ▶ Summon game
               </button>
               {!companion.isOnline && (
-                <p className="text-xs" style={{ color: 'rgba(255,107,0,0.35)' }}>Companion offline — will launch via Steam directly</p>
+                <p style={{ fontSize: '12px', color: 'rgba(255,107,0,0.35)' }}>Companion offline — will launch via Steam directly</p>
               )}
             </div>
           )}
 
-          {/* Launching state */}
+          {/* Launching */}
           {isLaunching && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4">
-              <img src={game.coverUrl} alt={game.name} className="w-16 h-16 rounded-lg shadow-lg" />
-              <div className="text-white font-semibold text-sm">Preparing {game.name}</div>
-              <div className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,107,0,0.2)', color: '#FF8C42' }}>
-                🎃 SUMMONING
-              </div>
-              <div className="space-y-2 w-full max-w-[200px]">
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+              <img src={game.coverUrl} alt={game.name} style={{ width: '64px', height: '64px', borderRadius: '8px' }} />
+              <div style={{ color: 'white', fontWeight: 600, fontSize: '14px' }}>Preparing {game.name}</div>
+              <div style={{ fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '9999px', background: 'rgba(255,107,0,0.2)', color: '#FF8C42' }}>🎃 SUMMONING</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '200px' }}>
                 {LAUNCH_STEPS.map((step, i) => (
-                  <div key={i} className={`flex items-center gap-2 text-xs transition-colors ${
-                    i < launchStep ? '' :
-                    i === launchStep ? 'text-white' :
-                    ''
-                  }`}>
-                    <span style={{ color: i < launchStep ? '#FF8C42' : i === launchStep ? 'white' : 'rgba(255,255,255,0.18)' }}>{i < launchStep ? '🕯️' : i === launchStep ? '⟳' : '○'}</span>
-                    <span>{step}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                    <span style={{ color: i < launchStep ? '#FF8C42' : i === launchStep ? 'white' : 'rgba(255,255,255,0.18)' }}>
+                      {i < launchStep ? '🕯️' : i === launchStep ? '⟳' : '○'}
+                    </span>
+                    <span style={{ color: i < launchStep ? 'rgba(255,255,255,0.7)' : i === launchStep ? 'white' : 'rgba(255,255,255,0.18)' }}>{step}</span>
                   </div>
                 ))}
               </div>
-              {launchStep >= 4 && (
-                <div className="w-full max-w-[200px] h-1 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full animate-pulse w-full" style={{ background: '#FF6B00' }} />
-                </div>
-              )}
             </div>
           )}
 
-          {/* Running state */}
+          {/* Running */}
           {isRunning && (
-            <div className="flex-1 flex flex-col gap-3">
-              {/* Session timer */}
-              {!isPro && (
-                <div className="bg-white/5 rounded-xl p-3">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-white/50">Session time</span>
-                    <span className={minutesLeft < 30 ? 'text-red-400' : 'text-white/70'}>
-                      {Math.max(0, Math.floor(minutesLeft / 60))}h {Math.max(0, minutesLeft % 60)}m left
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{ background: minutesLeft < 30 ? '#ef4444' : '#FF6B00', width: `${Math.max(0, (minutesLeft / effectiveLimit) * 100)}%` }}
-                    />
-                  </div>
-                  {minutesLeft < 60 && (
-                    <button
-                      onClick={() => { if (spendDeckPoints(20)) setBonusMinutes(m => m + 60); }}
-                      className="mt-2 w-full text-xs text-amber-400 hover:text-amber-300 transition-colors"
-                    >
-                      +1 hour for 20 CP →
-                    </button>
-                  )}
-                </div>
-              )}
-
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Scan UI */}
               {scanCheat && (
-                <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-2">
-                  <div className="text-xs text-white/70">{scanMsg}</div>
-                  <div className="flex gap-2">
+                <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>{scanMsg}</div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
                     <input
                       type="number"
                       value={scanValue}
                       onChange={e => setScanValue(e.target.value)}
-                      className="flex-1 rounded-lg px-3 py-2 text-white text-xs focus:outline-none"
-                      style={{ background: 'rgba(255,107,0,0.08)', border: '1px solid rgba(255,107,0,0.2)' }}
+                      style={{ flex: 1, borderRadius: '8px', padding: '8px 12px', color: 'white', fontSize: '12px', outline: 'none', background: 'rgba(255,107,0,0.08)', border: '1px solid rgba(255,107,0,0.2)' }}
                       placeholder="Enter value..."
                       onKeyDown={e => e.key === 'Enter' && handleScanSubmit()}
                     />
-                    <button
-                      onClick={handleScanSubmit}
-                      className="text-black text-xs font-bold px-3 py-2 rounded-lg transition-colors"
-                      style={{ background: '#FF6B00' }}
-                    >
+                    <button onClick={handleScanSubmit} style={{ background: '#FF6B00', color: '#000', fontSize: '12px', fontWeight: 700, padding: '8px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
                       {scanStep === 'write' ? 'Apply' : 'Scan'}
                     </button>
-                    <button
-                      onClick={() => { setScanCheat(null); setScanValue(''); companion.scan('reset'); }}
-                      className="text-white/30 hover:text-white/60 text-xs px-2"
-                    >
-                      ✕
-                    </button>
+                    <button onClick={() => { setScanCheat(null); setScanValue(''); companion.scan('reset'); }} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '0 8px' }}>✕</button>
                   </div>
                 </div>
               )}
 
-              {/* Stop button */}
               <button
-                onClick={async () => { await companion.detach(); setIsRunning(false); endSession(); }}
-                className="w-full border border-white/10 text-white/60 hover:text-white hover:border-white/20 text-sm py-2 rounded-xl transition-colors"
+                onClick={async () => { await companion.detach(); setIsRunning(false); }}
+                style={{ width: '100%', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: '14px', padding: '8px', borderRadius: '12px', background: 'transparent', cursor: 'pointer' }}
               >
                 ■ Stop trainer
               </button>
             </div>
           )}
 
-          {/* How it works */}
           {!isRunning && !isLaunching && (
-            <p className="text-xs leading-relaxed mt-4" style={{ color: 'rgba(255,107,0,0.25)' }}>
-              <span className="font-medium" style={{ color: 'rgba(255,107,0,0.4)' }}>🕷️ How it works:</span> Flip any spell toggle and watch the live values react. ModDeck connects directly to the game process — real values, real changes, no fake simulation.
+            <p style={{ fontSize: '12px', lineHeight: 1.5, marginTop: '16px', color: 'rgba(255,107,0,0.25)' }}>
+              <span style={{ color: 'rgba(255,107,0,0.4)', fontWeight: 500 }}>🕷️ How it works:</span> Flip any spell toggle and watch the live values react. ModDeck connects directly to the game process — real values, real changes, no fake simulation.
             </p>
           )}
         </div>
       </div>
 
       {/* Right: Cheat panel */}
-      <div className="flex-1 overflow-y-auto bg-[#0f0f0f] border-l border-white/5">
-        {/* Cheat profiles bar */}
-        <div className="sticky top-0 z-10 bg-[#0f0f0f]/90 backdrop-blur-sm border-b border-white/5 px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,107,0,0.4)' }}>🔮 Spell Profiles</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(255,107,0,0.1)', color: 'rgba(255,140,66,0.5)' }}>∞ UNLIMITED</span>
+      <div style={{ flex: 1, overflowY: 'auto', background: '#0f0f0f', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+        {/* Profiles bar */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'rgba(15,15,15,0.9)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'blur(4px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,107,0,0.4)' }}>🔮 Spell Profiles</span>
+            <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '9999px', background: 'rgba(255,107,0,0.1)', color: 'rgba(255,140,66,0.5)' }}>∞ UNLIMITED</span>
           </div>
-          <button className="text-xs text-white/40 hover:text-white/70 transition-colors border border-white/10 px-2 py-1 rounded-lg">
+          <button style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '6px', background: 'transparent', cursor: 'pointer' }}>
             + Save current
           </button>
         </div>
 
         {/* Cheats by category */}
-        <div className="p-4 space-y-6">
+        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {categories.map(category => (
             <div key={category}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">{category}</span>
-                <span className="text-[10px] text-white/20">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{category}</span>
+                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)' }}>
                   {game.cheats.filter(c => c.category === category && cheatStates[c.id]).length}/
                   {game.cheats.filter(c => c.category === category).length} active
                 </span>
               </div>
-
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {game.cheats.filter(c => c.category === category).map(cheat => {
                   const isActive = cheatStates[cheat.id] ?? false;
-                  const locked = cheat.proOnly && !isPro;
-                  const disabled = !isRunning || isAtLimit || locked;
-
+                  const disabled = !isRunning;
                   return (
-                    <div key={cheat.id} className={`rounded-xl px-4 py-3 transition-all ${locked ? 'opacity-60' : ''}`} style={{
-                      background: isActive ? 'rgba(255,107,0,0.07)' : '#0f0800',
-                      border: isActive ? '1px solid rgba(255,107,0,0.25)' : '1px solid rgba(255,107,0,0.06)',
-                    }}>
-                      <div className="flex items-center gap-3">
-                        {/* Toggle / Button */}
+                    <div key={cheat.id} style={{ borderRadius: '12px', padding: '12px 16px', background: isActive ? 'rgba(255,107,0,0.07)' : '#0f0800', border: isActive ? '1px solid rgba(255,107,0,0.25)' : '1px solid rgba(255,107,0,0.06)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {cheat.type === 'toggle' && (
                           <button
                             onClick={() => handleToggle(cheat)}
                             disabled={disabled}
-                            className={`relative w-10 h-5 rounded-full transition-all flex-shrink-0 ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                            style={{ background: isActive ? '#FF6B00' : 'rgba(255,255,255,0.1)', boxShadow: isActive ? '0 0 8px rgba(255,107,0,0.4)' : 'none' }}
+                            style={{ position: 'relative', width: '40px', height: '20px', borderRadius: '9999px', flexShrink: 0, border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1, background: isActive ? '#FF6B00' : 'rgba(255,255,255,0.1)', boxShadow: isActive ? '0 0 8px rgba(255,107,0,0.4)' : 'none' }}
                           >
-                            <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${isActive ? 'translate-x-5' : ''}`} />
+                            <span style={{ position: 'absolute', top: '2px', left: '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transform: isActive ? 'translateX(20px)' : 'translateX(0)', transition: 'transform 0.15s' }} />
                           </button>
                         )}
 
-                        {/* Label */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-white">{cheat.label}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 500, color: 'white' }}>{cheat.label}</span>
                             {cheat.hotkey && (
-                              <span className="text-[10px] bg-white/10 text-white/40 px-1.5 py-0.5 rounded font-mono">{cheat.hotkey}</span>
-                            )}
-                            {locked && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'rgba(255,107,0,0.12)', color: '#FF8C42' }}>💀 COVEN</span>
+                              <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>{cheat.hotkey}</span>
                             )}
                           </div>
-                          <div className="text-xs text-white/30 mt-0.5">{cheat.description}</div>
+                          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>{cheat.description}</div>
                         </div>
 
-                        {/* Value input */}
                         {cheat.type === 'value' && (
-                          <div className="flex items-center gap-1.5">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <input
                               type="number"
                               value={valueInputs[cheat.id] ?? (cheat.defaultValue ?? '')}
                               onChange={e => setValueInputs(s => ({ ...s, [cheat.id]: e.target.value }))}
                               disabled={disabled}
-                              className="w-24 rounded-lg px-2 py-1.5 text-white text-xs text-right focus:outline-none disabled:opacity-40"
-                              style={{ background: 'rgba(255,107,0,0.07)', border: '1px solid rgba(255,107,0,0.15)' }}
+                              style={{ width: '96px', borderRadius: '8px', padding: '6px 8px', color: 'white', fontSize: '12px', textAlign: 'right', outline: 'none', background: 'rgba(255,107,0,0.07)', border: '1px solid rgba(255,107,0,0.15)', opacity: disabled ? 0.4 : 1 }}
                             />
                             <button
                               onClick={() => handleValueSet(cheat)}
                               disabled={disabled}
-                              className="text-xs px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
-                              style={{ background: 'rgba(255,107,0,0.12)', color: '#FF8C42' }}
+                              style={{ fontSize: '12px', padding: '6px 10px', borderRadius: '8px', fontWeight: 500, background: 'rgba(255,107,0,0.12)', color: '#FF8C42', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1 }}
                             >
                               Cast
                             </button>
                           </div>
                         )}
 
-                        {/* Button cheat */}
                         {cheat.type === 'button' && (
                           <button
                             onClick={() => handleButton(cheat)}
                             disabled={disabled}
-                            className="text-xs px-3 py-1.5 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
-                            style={{ background: 'rgba(255,107,0,0.12)', color: '#FF8C42' }}
+                            style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '8px', fontWeight: 500, background: 'rgba(255,107,0,0.12)', color: '#FF8C42', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1 }}
                           >
                             Hex it
                           </button>
@@ -481,24 +331,6 @@ export default function TrainerView({ companion }: Props) {
             </div>
           ))}
         </div>
-
-        {/* Pro upsell if free */}
-        {!isPro && (
-          <div className="mx-4 mb-4 rounded-xl p-4 flex items-center gap-3" style={{ background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.2)' }}>
-            <span className="text-2xl">💀</span>
-            <div className="flex-1">
-              <div className="text-sm font-semibold" style={{ color: '#FF8C42' }}>Unlock Coven Spells</div>
-              <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Get unlimited time + 10x CP earning</div>
-            </div>
-            <button
-              onClick={() => setView('pro')}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
-              style={{ background: '#FF6B00', color: '#000' }}
-            >
-              $4.49/mo
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

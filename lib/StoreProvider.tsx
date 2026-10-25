@@ -15,7 +15,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     savePersisted(state);
-  }, [state.user, state.myGameIds, state.hasSeenWelcome]);
+  }, [state.user, state.hasSeenWelcome]);
 
   return (
     <StoreContext.Provider value={{ state, dispatch }}>

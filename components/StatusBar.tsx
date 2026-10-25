@@ -1,6 +1,5 @@
 'use client';
 
-import { useStore } from '@/lib/store';
 import { useCompanion } from '@/hooks/useCompanion';
 import { GAMES } from '@/data/games';
 
@@ -9,33 +8,19 @@ interface Props {
 }
 
 export default function StatusBar({ companion }: Props) {
-  const { user } = useStore();
   const { status, health, isAttached, attachedGameId } = companion;
-
   const attachedGame = GAMES.find(g => g.id === attachedGameId);
   const version = health?.version ?? '—';
-  const isPro = user?.plan === 'pro';
 
   return (
-    <div
-      className="h-8 border-t flex items-center px-4 gap-6 text-[11px] flex-shrink-0 relative"
-      style={{ background: '#0a0600', borderColor: 'rgba(255,107,0,0.1)' }}
-    >
+    <div style={{ height: '32px', borderTop: '1px solid rgba(255,107,0,0.1)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: '24px', fontSize: '11px', flexShrink: 0, background: '#0a0600' }}>
       {/* Companion status */}
-      <div className="flex items-center gap-1.5">
-        <div
-          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${status === 'online' || status === 'checking' ? 'animate-pulse' : ''}`}
-          style={{
-            background: status === 'online' ? '#4ade80' :
-              status === 'checking' ? '#FF8C42' :
-              'rgba(255,255,255,0.2)',
-          }}
-        />
-        <span style={{
-          color: status === 'online' ? '#4ade80' :
-            status === 'checking' ? '#FF8C42' :
-            'rgba(255,107,0,0.35)',
-        }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{
+          width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0,
+          background: status === 'online' ? '#4ade80' : status === 'checking' ? '#FF8C42' : 'rgba(255,255,255,0.2)',
+        }} />
+        <span style={{ color: status === 'online' ? '#4ade80' : status === 'checking' ? '#FF8C42' : 'rgba(255,107,0,0.35)' }}>
           {status === 'online'
             ? `🕸️ Companion v${version} · summoned`
             : status === 'checking'
@@ -44,58 +29,24 @@ export default function StatusBar({ companion }: Props) {
         </span>
       </div>
 
-      {/* Attached game */}
       {isAttached && attachedGame && (
         <>
-          <div className="w-px h-3" style={{ background: 'rgba(255,107,0,0.15)' }} />
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#FF6B00' }} />
+          <div style={{ width: '1px', height: '12px', background: 'rgba(255,107,0,0.15)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF6B00' }} />
             <span style={{ color: '#FF8C42' }}>{attachedGame.name} · spell active</span>
           </div>
         </>
       )}
 
-      {/* Spacer */}
-      <div className="flex-1" />
+      <div style={{ flex: 1 }} />
 
-      {/* Game running */}
-      {isAttached ? (
-        <span style={{ color: 'rgba(74,222,128,0.6)' }}>Game running</span>
-      ) : (
-        <span style={{ color: 'rgba(255,107,0,0.25)' }}>No game running</span>
-      )}
+      <span style={{ color: isAttached ? 'rgba(74,222,128,0.6)' : 'rgba(255,107,0,0.25)' }}>
+        {isAttached ? 'Game running' : 'No game running'}
+      </span>
 
-      <div className="w-px h-3" style={{ background: 'rgba(255,107,0,0.12)' }} />
-
-      {/* Candy Points balance */}
-      {user && (
-        <>
-          <div className="w-px h-3" style={{ background: 'rgba(255,107,0,0.12)' }} />
-          <div className="flex items-center gap-1" style={{ color: 'rgba(255,140,66,0.65)' }}>
-            <span>🍬</span>
-            <span>{user.deckPoints.toLocaleString()} CP</span>
-          </div>
-        </>
-      )}
-
-      {/* Divider */}
-      <div className="w-px h-3" style={{ background: 'rgba(255,107,0,0.12)' }} />
-
-      {/* Plan badge */}
-      {user && (
-        <div
-          className="px-1.5 py-0.5 rounded text-[10px] font-bold"
-          style={isPro ? {
-            background: 'rgba(255,107,0,0.2)',
-            color: '#FF8C42',
-          } : {
-            background: 'rgba(255,255,255,0.08)',
-            color: 'rgba(255,255,255,0.35)',
-          }}
-        >
-          {isPro ? '💀 COVEN' : 'FREE'}
-        </div>
-      )}
+      <div style={{ width: '1px', height: '12px', background: 'rgba(255,107,0,0.12)' }} />
+      <span style={{ color: 'rgba(255,107,0,0.4)' }}>FREE</span>
     </div>
   );
 }
