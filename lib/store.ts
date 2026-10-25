@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useReducer, useEffect, Dispatch, ReactNode } from 'react';
 
-export type View = 'trainer' | 'settings';
+export type View = 'home' | 'trainer' | 'settings';
 
 export interface User {
   id: string;
@@ -31,8 +31,8 @@ export type Action =
   | { type: 'LOAD'; state: Partial<State> };
 
 export const INITIAL_STATE: State = {
-  view: 'trainer',
-  selectedGameId: 'supermarket-simulator',
+  view: 'home',
+  selectedGameId: 'supermarket-together',
   user: null,
   steamGames: [],
   steamScanDone: false,

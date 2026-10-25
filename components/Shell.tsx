@@ -8,6 +8,7 @@ import Sidebar from './Sidebar';
 import StatusBar from './StatusBar';
 import TrainerView from './views/TrainerView';
 import SettingsView from './views/SettingsView';
+import HomeView from './views/HomeView';
 
 function App() {
   const { view, dispatch } = useStore();
@@ -28,6 +29,7 @@ function App() {
         <Sidebar companion={companion} />
         <main style={{ flex: 1, overflow: 'hidden', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
+            {view === 'home' && <HomeView companion={companion} />}
             {view === 'trainer' && <TrainerView companion={companion} />}
             {view === 'settings' && <SettingsView />}
           </div>
