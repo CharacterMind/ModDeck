@@ -313,7 +313,7 @@ export default function TrainerView({ companion }: Props) {
                       onClick={() => spendDeckPoints(20)}
                       className="mt-2 w-full text-xs text-amber-400 hover:text-amber-300 transition-colors"
                     >
-                      +1 hour for 20 DP →
+                      +1 hour for 20 CP →
                     </button>
                   )}
                 </div>
@@ -480,7 +480,7 @@ export default function TrainerView({ companion }: Props) {
             <span className="text-2xl">💀</span>
             <div className="flex-1">
               <div className="text-sm font-semibold" style={{ color: '#FF8C42' }}>Unlock Coven Spells</div>
-              <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Get unlimited time + 10x DP earning</div>
+              <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Get unlimited time + 10x CP earning</div>
             </div>
             <button
               onClick={() => setView('pro')}

@@ -69,11 +69,11 @@ export default function StatusBar({ companion }: Props) {
       {/* Divider */}
       <div className="w-px h-3" style={{ background: 'rgba(255,107,0,0.12)' }} />
 
-      {/* DP balance */}
+      {/* Candy Points balance */}
       {user && (
         <div className="flex items-center gap-1" style={{ color: 'rgba(255,140,66,0.65)' }}>
           <span>🍬</span>
-          <span>{user.deckPoints.toLocaleString()} DP</span>
+          <span>{user.deckPoints.toLocaleString()} CP</span>
         </div>
       )}
 

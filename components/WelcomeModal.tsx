@@ -136,7 +136,7 @@ export default function WelcomeModal({ onComplete }: Props) {
               </button>
             </form>
 
-            {/* DP gift */}
+            {/* Candy Points gift */}
             <div
               className="flex items-center gap-3 rounded-xl px-4 py-3"
               style={{ background: 'rgba(255,107,0,0.1)', border: '1px solid rgba(255,107,0,0.2)' }}

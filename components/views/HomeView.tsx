@@ -58,7 +58,7 @@ export default function HomeView({ companion }: Props) {
                   style={{ background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.25)' }}
                 >
                   <span className="text-sm">🍬</span>
-                  <span className="text-sm font-semibold" style={{ color: '#FF8C42' }}>{user.deckPoints} DP</span>
+                  <span className="text-sm font-semibold" style={{ color: '#FF8C42' }}>{user.deckPoints} CP</span>
                 </div>
                 {user.plan === 'pro' ? (
                   <div

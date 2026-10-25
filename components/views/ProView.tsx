@@ -14,7 +14,7 @@ export default function ProView() {
         <div className="text-center max-w-sm">
           <div className="text-5xl mb-4">💀</div>
           <h2 className="text-2xl font-bold text-white mb-2">You're in the Coven!</h2>
-          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>Unlimited trainer time, 10x DP earning, all spells unlocked. Thanks for supporting ModDeck.</p>
+          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>Unlimited trainer time, 10x CP earning, all spells unlocked. Thanks for supporting ModDeck.</p>
           <button
             onClick={() => setView('home')}
             className="font-bold px-6 py-3 rounded-xl text-sm transition-all"

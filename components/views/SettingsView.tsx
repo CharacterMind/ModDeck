@@ -34,7 +34,7 @@ export default function SettingsView() {
   const TABS = [
     { id: 'account', label: 'Account' },
     { id: 'subscription', label: 'Subscription' },
-    { id: 'deckpoints', label: 'Deck Points' },
+    { id: 'deckpoints', label: 'Candy Points' },
     { id: 'preferences', label: 'Preferences' },
     { id: 'privacy', label: 'Privacy' },
     { id: 'danger', label: 'Danger Zone' },
@@ -172,19 +172,19 @@ export default function SettingsView() {
 
         {tab === 'deckpoints' && (
           <div className="max-w-md space-y-6">
-            <h2 className="text-lg font-bold text-white">Deck Points</h2>
+            <h2 className="text-lg font-bold text-white">🍬 Candy Points</h2>
             <div className="bg-amber-400/5 border border-amber-400/20 rounded-2xl p-5">
               <div className="text-amber-400/60 text-xs font-semibold uppercase tracking-widest mb-1">Current Balance</div>
-              <div className="text-4xl font-black text-amber-400">{user?.deckPoints ?? 0} DP</div>
-              <div className="text-white/30 text-xs mt-1">449 DP = 1 free month of Pro</div>
+              <div className="text-4xl font-black text-amber-400">{user?.deckPoints ?? 0} CP</div>
+              <div className="text-white/30 text-xs mt-1">449 CP = 1 free month of Pro</div>
             </div>
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-white/60">How to earn</h3>
               {[
-                { label: 'Playing games (Free)', value: '2 DP / hour' },
-                { label: 'Playing games (Pro)', value: '10 DP / hour' },
-                { label: 'Monthly bonus (Pro)', value: '+100 DP / month' },
-                { label: 'Welcome gift', value: '50 DP (one time)' },
+                { label: 'Playing games (Free)', value: '2 CP / hour' },
+                { label: 'Playing games (Pro)', value: '10 CP / hour' },
+                { label: 'Monthly bonus (Pro)', value: '+100 CP / month' },
+                { label: 'Welcome gift', value: '50 CP (one time)' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
                   <span className="text-sm text-white/60">{label}</span>
@@ -203,7 +203,7 @@ export default function SettingsView() {
                 { label: 'Dark mode', sub: 'Always on — it just looks better', active: true, disabled: true },
                 { label: 'Sound effects', sub: 'Play sounds on cheat activation', active: false },
                 { label: 'New trainer notifications', sub: 'Notify when a trainer for your games is added', active: true },
-                { label: 'Deck Points milestones', sub: 'Notify when you hit DP thresholds', active: true },
+                { label: 'Candy Points milestones', sub: 'Notify when you hit CP thresholds', active: true },
               ].map(({ label, sub, active, disabled }) => (
                 <div key={label} className="flex items-center gap-4 bg-[#141414] border border-white/5 rounded-xl px-4 py-3">
                   <div className="flex-1">
@@ -250,7 +250,7 @@ export default function SettingsView() {
               </div>
               <button
                 onClick={() => {
-                  if (confirm('Are you sure? This will delete your account and all Deck Points permanently.')) {
+                  if (confirm('Are you sure? This will delete your account and all Candy Points permanently.')) {
                     setUser(null);
                   }
                 }}
