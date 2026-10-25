@@ -25,20 +25,32 @@ export default function TrainerView({ companion }: Props) {
   const [scanMsg, setScanMsg] = useState('');
   const [valueInputs, setValueInputs] = useState<Record<string, string>>({});
   const [sessionMinutes, setSessionMinutes] = useState(0);
+  const [bonusMinutes, setBonusMinutes] = useState(0);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const FREE_LIMIT_MINUTES = 5 * 60; // 2 hours
+  const FREE_LIMIT_MINUTES = 5 * 60;
+  const effectiveLimit = FREE_LIMIT_MINUTES + bonusMinutes;
   const isPro = user?.plan === 'pro';
-  const minutesLeft = FREE_LIMIT_MINUTES - sessionMinutes;
-  const isAtLimit = !isPro && sessionMinutes >= FREE_LIMIT_MINUTES;
+  const minutesLeft = effectiveLimit - sessionMinutes;
+  const isAtLimit = !isPro && sessionMinutes >= effectiveLimit;
+
+  // Reset per-game state when switching games
+  useEffect(() => {
+    setCheatStates({});
+    setScanCheat(null);
+    setScanValue('');
+    setScanStep('first');
+    setScanMsg('');
+    setValueInputs({});
+  }, [selectedGameId]);
 
   // Sync attached state with companion
   useEffect(() => {
     if (companion.isAttached && companion.attachedGameId === selectedGameId) {
       setIsRunning(true);
-    } else if (isRunning && !companion.isAttached) {
+    } else if (isRunning) {
       setIsRunning(false);
-      endSession();
+      if (!companion.isAttached) endSession();
     }
   }, [companion.isAttached, companion.attachedGameId, selectedGameId]);
 
@@ -305,12 +317,12 @@ export default function TrainerView({ companion }: Props) {
                   <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
-                      style={{ background: minutesLeft < 30 ? '#ef4444' : '#FF6B00', width: `${Math.max(0, (minutesLeft / FREE_LIMIT_MINUTES) * 100)}%` }}
+                      style={{ background: minutesLeft < 30 ? '#ef4444' : '#FF6B00', width: `${Math.max(0, (minutesLeft / effectiveLimit) * 100)}%` }}
                     />
                   </div>
                   {minutesLeft < 60 && (
                     <button
-                      onClick={() => spendDeckPoints(20)}
+                      onClick={() => { if (spendDeckPoints(20)) setBonusMinutes(m => m + 60); }}
                       className="mt-2 w-full text-xs text-amber-400 hover:text-amber-300 transition-colors"
                     >
                       +1 hour for 20 CP →

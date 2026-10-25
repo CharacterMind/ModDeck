@@ -51,10 +51,10 @@ export interface ScanResult {
   error?: string;
 }
 
-async function companionFetch(path: string, options?: RequestInit) {
+async function companionFetch(path: string, options?: RequestInit, timeoutMs = 3000) {
   const res = await fetch(`${COMPANION_URL}${path}`, {
     ...options,
-    signal: AbortSignal.timeout(3000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   return res.json();
 }
@@ -117,7 +117,7 @@ export function useCompanion() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ gameId, processes, waitSeconds: 18 }),
-      });
+      }, 22000);
     } catch {
       return { found: false, error: 'Companion offline' };
     }

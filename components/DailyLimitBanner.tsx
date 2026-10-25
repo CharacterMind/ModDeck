@@ -69,7 +69,7 @@ export default function DailyLimitBanner() {
           <span className="text-base">⏳</span>
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: accentColor }}>
-              Daily Limit
+              Session Limit
             </div>
             <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
               Free plan
@@ -106,7 +106,7 @@ export default function DailyLimitBanner() {
             <div className="font-black text-lg leading-none" style={{ color: isOut ? '#ef4444' : '#fff' }}>
               {isOut ? '0h' : fmtMins(remaining)}
             </div>
-            <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>left today</div>
+            <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>this session</div>
           </div>
           <div
             className="px-3 py-1.5 rounded-lg text-xs font-bold"
@@ -134,12 +134,12 @@ export default function DailyLimitBanner() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xl">⏳</span>
-                  <span className="font-bold text-white text-base">Daily Play Time</span>
+                  <span className="font-bold text-white text-base">Session Play Time</span>
                 </div>
                 <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   {isOut
-                    ? "You've reached your 5-hour free limit for today. Come back tomorrow or upgrade."
-                    : `You have ${fmtMins(remaining)} of free trainer time left today.`}
+                    ? "You've reached your 5-hour free limit for this session. Upgrade for unlimited time."
+                    : `You have ${fmtMins(remaining)} of free trainer time left this session.`}
                 </p>
 
                 {/* Large progress bar */}
