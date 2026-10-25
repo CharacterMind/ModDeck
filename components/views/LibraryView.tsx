@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useStore } from '@/lib/store';
 import { GAMES, GENRES } from '@/data/games';
 import { useCompanion } from '@/hooks/useCompanion';
@@ -13,7 +13,32 @@ export default function LibraryView({ companion }: Props) {
   const { setView, setSelectedGame, myGameIds, addMyGame, removeMyGame } = useStore();
   const [search, setSearch] = useState('');
   const [genre, setGenre] = useState('All');
+  const [scanning, setScanning] = useState(false);
+  const [steamDetected, setSteamDetected] = useState<string[]>([]);
+  const [scanDone, setScanDone] = useState(false);
   const installedIds = new Set(companion.installed.map(i => i.gameId));
+
+  const scanSteam = useCallback(async () => {
+    setScanning(true);
+    try {
+      const res = await fetch('/api/steam-library');
+      const data = await res.json();
+      if (data.ok && data.games) {
+        const detectedIds: string[] = [];
+        for (const { appId } of data.games) {
+          const match = GAMES.find(g => g.steamAppId === appId);
+          if (match) detectedIds.push(match.id);
+        }
+        setSteamDetected(detectedIds);
+        // Auto-add them all
+        for (const id of detectedIds) addMyGame(id);
+      }
+    } catch {
+      // Server not local (Render deploy) — silently skip
+    }
+    setScanDone(true);
+    setScanning(false);
+  }, [addMyGame]);
 
   const filtered = GAMES.filter(g => {
     const matchesSearch = g.name.toLowerCase().includes(search.toLowerCase());
@@ -32,8 +57,34 @@ export default function LibraryView({ companion }: Props) {
       <div className="p-6 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,107,0,0.1)' }}>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-white">📖 Grimoire</h1>
-          <div className="text-sm" style={{ color: 'rgba(255,107,0,0.45)' }}>{GAMES.length} trainers</div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm" style={{ color: 'rgba(255,107,0,0.45)' }}>{GAMES.length} trainers</div>
+            <button
+              onClick={scanSteam}
+              disabled={scanning}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+              style={{ background: scanning ? 'rgba(255,107,0,0.12)' : '#FF6B00', color: scanning ? '#FF8C42' : '#000' }}
+            >
+              {scanning ? '⟳ Scanning…' : '🔍 Scan Steam'}
+            </button>
+          </div>
         </div>
+
+        {/* Steam scan result banner */}
+        {scanDone && (
+          <div className="mb-3 rounded-xl px-4 py-3 flex items-center gap-3 text-sm" style={{
+            background: steamDetected.length > 0 ? 'rgba(255,107,0,0.08)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${steamDetected.length > 0 ? 'rgba(255,107,0,0.25)' : 'rgba(255,255,255,0.08)'}`,
+          }}>
+            <span className="text-lg">{steamDetected.length > 0 ? '🎮' : '🕸️'}</span>
+            <span style={{ color: steamDetected.length > 0 ? '#FF8C42' : 'rgba(255,255,255,0.35)' }}>
+              {steamDetected.length > 0
+                ? `Found ${steamDetected.length} game${steamDetected.length !== 1 ? 's' : ''} from your Steam library — added to your sidebar`
+                : 'No matching games found in your Steam library'}
+            </span>
+            <button onClick={() => setScanDone(false)} className="ml-auto text-white/20 hover:text-white/50 text-xs">✕</button>
+          </div>
+        )}
         <input
           type="text"
           value={search}
