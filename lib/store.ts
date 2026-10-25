@@ -121,7 +121,7 @@ export function useStore() {
   };
 }
 
-export const FREE_SESSION_HOURS = 2;
+export const FREE_SESSION_HOURS = 5;
 
 const STORAGE_KEY = 'moddeck-store-v1';
 

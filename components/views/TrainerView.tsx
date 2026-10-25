@@ -27,7 +27,7 @@ export default function TrainerView({ companion }: Props) {
   const [sessionMinutes, setSessionMinutes] = useState(0);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const FREE_LIMIT_MINUTES = 2 * 60; // 2 hours
+  const FREE_LIMIT_MINUTES = 5 * 60; // 2 hours
   const isPro = user?.plan === 'pro';
   const minutesLeft = FREE_LIMIT_MINUTES - sessionMinutes;
   const isAtLimit = !isPro && sessionMinutes >= FREE_LIMIT_MINUTES;

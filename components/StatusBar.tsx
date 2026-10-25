@@ -9,7 +9,7 @@ interface Props {
   companion: ReturnType<typeof useCompanion>;
 }
 
-const FREE_LIMIT_MINUTES = 2 * 60;
+const FREE_LIMIT_MINUTES = 5 * 60;
 
 export default function StatusBar({ companion }: Props) {
   const { user, sessionStart, setView, getSessionMinutes } = useStore();
