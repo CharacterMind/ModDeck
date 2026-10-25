@@ -14,7 +14,6 @@ export default function StatusBar({ companion }: Props) {
 
   return (
     <div style={{ height: '32px', borderTop: '1px solid rgba(255,107,0,0.1)', display: 'flex', alignItems: 'center', padding: '0 16px', gap: '24px', fontSize: '11px', flexShrink: 0, background: '#0a0600' }}>
-      {/* Companion status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <div style={{
           width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0,

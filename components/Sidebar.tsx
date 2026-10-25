@@ -1,24 +1,26 @@
 'use client';
 
 import { useStore } from '@/lib/store';
-import { GAMES } from '@/data/games';
+import { GAMES, STEAM_ID_MAP } from '@/data/games';
 import { useCompanion } from '@/hooks/useCompanion';
-
-const game = GAMES[0];
-
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/);
-  if (words.length > 1) return words.slice(0, 2).map(w => w[0].toUpperCase()).join('');
-  return name.slice(0, Math.min(2, name.length)).toUpperCase();
-}
 
 interface Props {
   companion: ReturnType<typeof useCompanion>;
 }
 
 export default function Sidebar({ companion }: Props) {
-  const { view, setView, user } = useStore();
-  const isInstalled = companion.installed.some(i => i.gameId === game.id);
+  const { view, setView, setSelectedGame, selectedGameId, steamGames, steamScanDone } = useStore();
+
+  const installedSupportedIds = new Set(
+    steamGames
+      .filter(sg => STEAM_ID_MAP[sg.appId])
+      .map(sg => STEAM_ID_MAP[sg.appId])
+  );
+
+  const catalogGames = GAMES.map(g => ({
+    ...g,
+    installed: installedSupportedIds.has(g.id),
+  }));
 
   return (
     <aside style={{ width: '160px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#0f0800', borderRight: '1px solid rgba(255,107,0,0.12)' }}>
@@ -57,32 +59,39 @@ export default function Sidebar({ companion }: Props) {
         <div style={{ height: '1px', background: 'rgba(255,107,0,0.08)' }} />
       </div>
 
-      {/* Game entry */}
-      <div style={{ flex: 1, padding: '8px' }}>
+      {/* Game list */}
+      <div style={{ flex: 1, padding: '0 8px 8px' }}>
         <div style={{ padding: '6px 8px', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,107,0,0.4)' }}>
-          🦇 Haunted ({1})
+          🦇 Haunted ({catalogGames.length})
         </div>
-        <button
-          onClick={() => setView('trainer')}
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '6px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-            background: view === 'trainer' ? 'rgba(255,107,0,0.12)' : 'transparent',
-          }}
-        >
-          <div style={{ width: '24px', height: '24px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
-            <img src={game.coverUrl} alt={game.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <span style={{ fontSize: '12px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: view === 'trainer' ? '#FF8C42' : 'rgba(255,255,255,0.55)' }}>
-            {game.name}
-          </span>
-          {isInstalled && (
-            <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0, background: '#FF6B00' }} />
-          )}
-        </button>
+        {catalogGames.map(game => {
+          const isSelected = selectedGameId === game.id;
+          return (
+            <button
+              key={game.id}
+              onClick={() => setSelectedGame(game.id)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '6px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                background: isSelected ? 'rgba(255,107,0,0.12)' : 'transparent',
+                marginBottom: '2px',
+              }}
+            >
+              <div style={{ width: '24px', height: '24px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
+                <img src={game.coverUrl} alt={game.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <span style={{ fontSize: '12px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: isSelected ? '#FF8C42' : 'rgba(255,255,255,0.55)' }}>
+                {game.name}
+              </span>
+              {steamScanDone && game.installed && (
+                <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0, background: '#FF6B00' }} />
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Bottom: Settings + User */}
+      {/* Bottom: Settings */}
       <div style={{ borderTop: '1px solid rgba(255,107,0,0.12)', padding: '8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <button
           onClick={() => setView('settings')}
@@ -97,23 +106,6 @@ export default function Sidebar({ companion }: Props) {
           <span style={{ fontSize: '16px', lineHeight: 1 }}>🕷️</span>
           <span>Settings</span>
         </button>
-
-        {user && (
-          <button
-            onClick={() => setView('settings')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: 'transparent' }}
-          >
-            <div style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '9px', flexShrink: 0, background: '#FF6B00', color: '#000', boxShadow: '0 0 8px rgba(255,107,0,0.5)' }}>
-              {user.avatarUrl
-                ? <img src={user.avatarUrl} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                : getInitials(user.name)}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '12px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'rgba(255,255,255,0.75)' }}>{user.name}</div>
-              <div style={{ fontSize: '10px', color: 'rgba(255,107,0,0.5)' }}>Free</div>
-            </div>
-          </button>
-        )}
       </div>
     </aside>
   );

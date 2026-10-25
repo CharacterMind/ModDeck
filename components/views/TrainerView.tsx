@@ -50,7 +50,7 @@ export default function TrainerView({ companion }: Props) {
 
   async function handleLaunch() {
     if (!companion.isOnline) {
-      if (game.steamAppId) window.open(`steam://rungameid/${game.steamAppId}`);
+      window.open(`steam://rungameid/${game.steamAppId}`);
       return;
     }
     setIsLaunching(true);
@@ -153,9 +153,9 @@ export default function TrainerView({ companion }: Props) {
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '4px', fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-                <span>⭐ {game.rating}</span>
-                <span>·</span>
                 <span>{game.cheats.length} cheats</span>
+                <span>·</span>
+                <span>{game.genre}</span>
                 <span>·</span>
                 <span>{game.platform}</span>
               </div>
@@ -180,6 +180,9 @@ export default function TrainerView({ companion }: Props) {
               </button>
               {!companion.isOnline && (
                 <p style={{ fontSize: '12px', color: 'rgba(255,107,0,0.35)' }}>Companion offline — will launch via Steam directly</p>
+              )}
+              {scanMsg && (
+                <p style={{ fontSize: '12px', color: 'rgba(255,100,100,0.7)', margin: 0 }}>{scanMsg}</p>
               )}
             </div>
           )}
@@ -206,7 +209,6 @@ export default function TrainerView({ companion }: Props) {
           {/* Running */}
           {isRunning && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {/* Scan UI */}
               {scanCheat && (
                 <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>{scanMsg}</div>
@@ -281,7 +283,7 @@ export default function TrainerView({ companion }: Props) {
                             disabled={disabled}
                             style={{ position: 'relative', width: '40px', height: '20px', borderRadius: '9999px', flexShrink: 0, border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1, background: isActive ? '#FF6B00' : 'rgba(255,255,255,0.1)', boxShadow: isActive ? '0 0 8px rgba(255,107,0,0.4)' : 'none' }}
                           >
-                            <span style={{ position: 'absolute', top: '2px', left: '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transform: isActive ? 'translateX(20px)' : 'translateX(0)', transition: 'transform 0.15s' }} />
+                            <span style={{ position: 'absolute', top: '2px', left: '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transform: isActive ? 'translateX(20px)' : 'translateX(0)', transition: 'transform 0.15s', display: 'block' }} />
                           </button>
                         )}
 

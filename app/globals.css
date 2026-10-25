@@ -6,10 +6,7 @@
   --orange: #FF6B00;
   --orange-light: #FF8C42;
   --orange-dim: rgba(255, 107, 0, 0.15);
-  --purple: #9B59B6;
-  --purple-dim: rgba(155, 89, 182, 0.15);
   --glow-orange: 0 0 20px rgba(255, 107, 0, 0.3);
-  --glow-purple: 0 0 20px rgba(155, 89, 182, 0.3);
 }
 
 * {
