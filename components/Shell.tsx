@@ -14,11 +14,13 @@ import ProView from './views/ProView';
 import SettingsView from './views/SettingsView';
 import WelcomeModal from './WelcomeModal';
 import DailyLimitBanner from './DailyLimitBanner';
+import WhatsNewModal from './WhatsNewModal';
 
 function App() {
   const { view, user, setUser, hasSeenWelcome, setHasSeenWelcome } = useStore();
   const companion = useCompanion();
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showWhatsNew, setShowWhatsNew] = useState(false);
 
   useEffect(() => {
     if (companion.isOnline) {
@@ -50,7 +52,7 @@ function App() {
   return (
     <div className="flex flex-col h-screen bg-[#0a0a0a] text-white overflow-hidden" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0a0a0a' }}>
       <div className="flex flex-1 overflow-hidden" style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
-        <Sidebar companion={companion} />
+        <Sidebar companion={companion} onWhatsNew={() => setShowWhatsNew(true)} />
         <main className="flex-1 overflow-hidden flex flex-col" style={{ flex: 1, overflow: 'hidden', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           <DailyLimitBanner />
           <div className="flex-1 overflow-hidden min-h-0" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
@@ -70,6 +72,7 @@ function App() {
       </div>
       <StatusBar companion={companion} />
       {showWelcome && <WelcomeModal onComplete={handleWelcomeComplete} />}
+      {showWhatsNew && <WhatsNewModal onClose={() => setShowWhatsNew(false)} />}
     </div>
   );
 }

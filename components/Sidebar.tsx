@@ -10,10 +10,6 @@ const NAV = [
   { id: 'pulse', label: 'Séance', icon: '🔮', badge: 'NEW' },
 ];
 
-interface Props {
-  companion: ReturnType<typeof useCompanion>;
-}
-
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/);
   if (words.length > 1) {
@@ -26,7 +22,12 @@ function getInitials(name: string): string {
   return name.slice(0, Math.min(2, name.length)).toUpperCase();
 }
 
-export default function Sidebar({ companion }: Props) {
+interface Props {
+  companion: ReturnType<typeof useCompanion>;
+  onWhatsNew: () => void;
+}
+
+export default function Sidebar({ companion, onWhatsNew }: Props) {
   const { view, setView, selectedGameId, setSelectedGame, myGameIds, user } = useStore();
 
   const myGames = GAMES.filter(g => myGameIds.includes(g.id));
@@ -156,8 +157,17 @@ export default function Sidebar({ companion }: Props) {
         </div>
       </div>
 
-      {/* Bottom: Settings + User */}
+      {/* Bottom: What's New + Settings + User */}
       <div className="border-t p-2 space-y-0.5" style={{ borderColor: 'rgba(255,107,0,0.12)' }}>
+        <button
+          onClick={onWhatsNew}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all"
+          style={{ color: 'rgba(255,255,255,0.45)' }}
+        >
+          <span className="text-base leading-none">🆕</span>
+          <span className="font-medium">What&apos;s New</span>
+          <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FF6B00', color: '#000' }}>V330</span>
+        </button>
         <button
           onClick={() => setView('settings')}
           className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all"
