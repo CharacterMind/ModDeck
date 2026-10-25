@@ -26,25 +26,30 @@ export default function LibraryView({ companion }: Props) {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-white/5 flex-shrink-0">
+      <div className="p-6 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,107,0,0.1)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-white">Library</h1>
-          <div className="text-sm text-white/30">{GAMES.length} trainers</div>
+          <h1 className="text-xl font-bold text-white">📖 Grimoire</h1>
+          <div className="text-sm" style={{ color: 'rgba(255,107,0,0.45)' }}>{GAMES.length} spells</div>
         </div>
         <input
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search games..."
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
+          placeholder="Search the grimoire..."
+          className="w-full rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all"
+          style={{
+            background: 'rgba(255,107,0,0.06)',
+            border: '1px solid rgba(255,107,0,0.15)',
+            color: 'white',
+          }}
         />
       </div>
 
       {/* Installed section */}
       {companion.installed.length > 0 && !search && (
         <div className="px-6 pt-4 flex-shrink-0">
-          <div className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
-            Detected on your PC ({companion.installed.length})
+          <div className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,107,0,0.4)' }}>
+            🕷️ Detected on your PC ({companion.installed.length})
           </div>
           <div className="flex flex-wrap gap-2">
             {companion.installed.map(inst => {
@@ -54,15 +59,19 @@ export default function LibraryView({ companion }: Props) {
                 <button
                   key={inst.gameId}
                   onClick={() => openTrainer(inst.gameId)}
-                  className="flex items-center gap-2 bg-emerald-400/5 border border-emerald-400/20 hover:border-emerald-400/40 rounded-full px-3 py-1.5 transition-colors"
+                  className="flex items-center gap-2 rounded-full px-3 py-1.5 transition-all"
+                  style={{
+                    background: 'rgba(255,107,0,0.08)',
+                    border: '1px solid rgba(255,107,0,0.25)',
+                  }}
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-emerald-400 text-xs font-medium">{game.name}</span>
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#FF6B00' }} />
+                  <span className="text-xs font-medium" style={{ color: '#FF8C42' }}>{game.name}</span>
                 </button>
               );
             })}
           </div>
-          <div className="h-px bg-white/5 mt-4" />
+          <div className="h-px mt-4" style={{ background: 'rgba(255,107,0,0.08)' }} />
         </div>
       )}
 
@@ -75,7 +84,11 @@ export default function LibraryView({ companion }: Props) {
             return (
               <div
                 key={game.id}
-                className="flex items-center gap-3 bg-[#141414] hover:bg-[#1a1a1a] border border-white/5 hover:border-white/10 rounded-xl p-3 transition-all group"
+                className="flex items-center gap-3 rounded-xl p-3 transition-all group"
+                style={{
+                  background: '#110800',
+                  border: '1px solid rgba(255,107,0,0.07)',
+                }}
               >
                 <img
                   src={game.coverUrl}
@@ -86,13 +99,13 @@ export default function LibraryView({ companion }: Props) {
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openTrainer(game.id)}>
                   <div className="text-white text-sm font-medium">{game.name}</div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-white/30 text-xs">{game.cheats.length} cheats</span>
-                    <span className="text-white/20 text-xs">·</span>
-                    <span className="text-white/30 text-xs capitalize">{game.platform}</span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{game.cheats.length} spells</span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
+                    <span className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.3)' }}>{game.platform}</span>
                     {installed && (
                       <>
-                        <span className="text-white/20 text-xs">·</span>
-                        <span className="text-emerald-400 text-xs">✓ Installed</span>
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>·</span>
+                        <span className="text-xs" style={{ color: '#FF8C42' }}>🔥 Installed</span>
                       </>
                     )}
                   </div>
@@ -102,17 +115,24 @@ export default function LibraryView({ companion }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => inMyGames ? removeMyGame(game.id) : addMyGame(game.id)}
-                    className={`text-xs px-2.5 py-1.5 rounded-lg transition-colors ${
-                      inMyGames
-                        ? 'bg-white/10 text-white/40 hover:bg-white/5'
-                        : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70'
-                    }`}
+                    className="text-xs px-2.5 py-1.5 rounded-lg transition-all"
+                    style={inMyGames ? {
+                      background: 'rgba(255,255,255,0.08)',
+                      color: 'rgba(255,255,255,0.35)',
+                    } : {
+                      background: 'rgba(255,107,0,0.06)',
+                      color: 'rgba(255,140,66,0.5)',
+                    }}
                   >
                     {inMyGames ? '✓ Added' : '+ Add'}
                   </button>
                   <button
                     onClick={() => openTrainer(game.id)}
-                    className="bg-amber-400/10 hover:bg-amber-400/20 text-amber-400 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                    style={{
+                      background: 'rgba(255,107,0,0.12)',
+                      color: '#FF8C42',
+                    }}
                   >
                     Open →
                   </button>
@@ -122,9 +142,9 @@ export default function LibraryView({ companion }: Props) {
           })}
 
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-white/30">
-              <div className="text-3xl mb-2">🔍</div>
-              <div className="text-sm">No games found for "{search}"</div>
+            <div className="text-center py-16" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              <div className="text-3xl mb-2">🕸️</div>
+              <div className="text-sm">No spells found for "{search}"</div>
             </div>
           )}
         </div>

@@ -217,8 +217,8 @@ export default function TrainerView({ companion }: Props) {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-white font-bold text-lg leading-tight">{game.name}</h1>
-                <span className="text-[10px] font-bold bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">
-                  TRAINER v1.0
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,0,0.18)', color: '#FF8C42' }}>
+                  🎃 TRAINER v1.0
                 </span>
               </div>
               <div className="flex items-center gap-2 mt-1 text-xs text-white/40">
@@ -234,22 +234,30 @@ export default function TrainerView({ companion }: Props) {
           {/* Not running state */}
           {!isRunning && !isLaunching && (
             <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-              <div className="text-4xl opacity-30">🛒</div>
+              <div className="text-4xl">👻</div>
               <div>
                 <div className="text-white font-semibold mb-1">Game not running</div>
-                <div className="text-white/40 text-xs leading-relaxed">
-                  Launch {game.name} to attach the trainer and watch your cheats work in real time
+                <div className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Summon {game.name} to attach the trainer and cast spells in real time
                 </div>
               </div>
               <button
                 onClick={handleLaunch}
                 disabled={!companion.isOnline}
-                className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 disabled:bg-white/10 disabled:text-white/30 text-black font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                className="flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition-all text-sm"
+                style={companion.isOnline ? {
+                  background: '#FF6B00',
+                  color: '#000',
+                  boxShadow: '0 0 15px rgba(255,107,0,0.35)',
+                } : {
+                  background: 'rgba(255,255,255,0.08)',
+                  color: 'rgba(255,255,255,0.25)',
+                }}
               >
-                ▶ Launch game
+                🎃 Summon game
               </button>
               {!companion.isOnline && (
-                <p className="text-white/30 text-xs">Start the ModDeck Companion first</p>
+                <p className="text-xs" style={{ color: 'rgba(255,107,0,0.35)' }}>Start the ModDeck Companion first</p>
               )}
             </div>
           )}
@@ -259,24 +267,24 @@ export default function TrainerView({ companion }: Props) {
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
               <img src={game.coverUrl} alt={game.name} className="w-16 h-16 rounded-lg shadow-lg" />
               <div className="text-white font-semibold text-sm">Preparing {game.name}</div>
-              <div className="bg-amber-400/20 text-amber-400 text-xs font-bold px-3 py-1 rounded-full">
-                ⚡ LAUNCHING
+              <div className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,107,0,0.2)', color: '#FF8C42' }}>
+                🎃 SUMMONING
               </div>
               <div className="space-y-2 w-full max-w-[200px]">
                 {LAUNCH_STEPS.map((step, i) => (
                   <div key={i} className={`flex items-center gap-2 text-xs transition-colors ${
-                    i < launchStep ? 'text-emerald-400' :
+                    i < launchStep ? '' :
                     i === launchStep ? 'text-white' :
-                    'text-white/20'
+                    ''
                   }`}>
-                    <span>{i < launchStep ? '✓' : i === launchStep ? '⟳' : '○'}</span>
+                    <span style={{ color: i < launchStep ? '#FF8C42' : i === launchStep ? 'white' : 'rgba(255,255,255,0.18)' }}>{i < launchStep ? '🕯️' : i === launchStep ? '⟳' : '○'}</span>
                     <span>{step}</span>
                   </div>
                 ))}
               </div>
               {launchStep >= 4 && (
                 <div className="w-full max-w-[200px] h-1 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-400 rounded-full animate-pulse w-full" />
+                  <div className="h-full rounded-full animate-pulse w-full" style={{ background: '#FF6B00' }} />
                 </div>
               )}
             </div>
@@ -296,8 +304,8 @@ export default function TrainerView({ companion }: Props) {
                   </div>
                   <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${minutesLeft < 30 ? 'bg-red-400' : 'bg-amber-400'}`}
-                      style={{ width: `${Math.max(0, (minutesLeft / FREE_LIMIT_MINUTES) * 100)}%` }}
+                      className="h-full rounded-full transition-all"
+                      style={{ background: minutesLeft < 30 ? '#ef4444' : '#FF6B00', width: `${Math.max(0, (minutesLeft / FREE_LIMIT_MINUTES) * 100)}%` }}
                     />
                   </div>
                   {minutesLeft < 60 && (
@@ -320,13 +328,15 @@ export default function TrainerView({ companion }: Props) {
                       type="number"
                       value={scanValue}
                       onChange={e => setScanValue(e.target.value)}
-                      className="flex-1 bg-white/10 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+                      className="flex-1 rounded-lg px-3 py-2 text-white text-xs focus:outline-none"
+                      style={{ background: 'rgba(255,107,0,0.08)', border: '1px solid rgba(255,107,0,0.2)' }}
                       placeholder="Enter value..."
                       onKeyDown={e => e.key === 'Enter' && handleScanSubmit()}
                     />
                     <button
                       onClick={handleScanSubmit}
-                      className="bg-amber-400 text-black text-xs font-bold px-3 py-2 rounded-lg hover:bg-amber-300 transition-colors"
+                      className="text-black text-xs font-bold px-3 py-2 rounded-lg transition-colors"
+                      style={{ background: '#FF6B00' }}
                     >
                       {scanStep === 'write' ? 'Apply' : 'Scan'}
                     </button>
@@ -352,8 +362,8 @@ export default function TrainerView({ companion }: Props) {
 
           {/* How it works */}
           {!isRunning && !isLaunching && (
-            <p className="text-white/20 text-xs leading-relaxed mt-4">
-              <span className="text-white/40 font-medium">How it works:</span> Flip any cheat toggle and watch the live values react. ModDeck connects directly to the game process — real values, real changes, no fake simulation.
+            <p className="text-xs leading-relaxed mt-4" style={{ color: 'rgba(255,107,0,0.25)' }}>
+              <span className="font-medium" style={{ color: 'rgba(255,107,0,0.4)' }}>🕷️ How it works:</span> Flip any spell toggle and watch the live values react. ModDeck connects directly to the game process — real values, real changes, no fake simulation.
             </p>
           )}
         </div>
@@ -364,8 +374,8 @@ export default function TrainerView({ companion }: Props) {
         {/* Cheat profiles bar */}
         <div className="sticky top-0 z-10 bg-[#0f0f0f]/90 backdrop-blur-sm border-b border-white/5 px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">Cheat Profiles</span>
-            <span className="text-[10px] bg-white/10 text-white/40 px-1.5 py-0.5 rounded-full">∞ UNLIMITED</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,107,0,0.4)' }}>🔮 Spell Profiles</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(255,107,0,0.1)', color: 'rgba(255,140,66,0.5)' }}>∞ UNLIMITED</span>
           </div>
           <button className="text-xs text-white/40 hover:text-white/70 transition-colors border border-white/10 px-2 py-1 rounded-lg">
             + Save current
@@ -391,20 +401,18 @@ export default function TrainerView({ companion }: Props) {
                   const disabled = !isRunning || isAtLimit || locked;
 
                   return (
-                    <div key={cheat.id} className={`bg-[#161616] border rounded-xl px-4 py-3 transition-colors ${
-                      isActive ? 'border-amber-400/30 bg-amber-400/5' :
-                      locked ? 'border-white/5 opacity-60' :
-                      'border-white/5 hover:border-white/10'
-                    }`}>
+                    <div key={cheat.id} className={`rounded-xl px-4 py-3 transition-all ${locked ? 'opacity-60' : ''}`} style={{
+                      background: isActive ? 'rgba(255,107,0,0.07)' : '#0f0800',
+                      border: isActive ? '1px solid rgba(255,107,0,0.25)' : '1px solid rgba(255,107,0,0.06)',
+                    }}>
                       <div className="flex items-center gap-3">
                         {/* Toggle / Button */}
                         {cheat.type === 'toggle' && (
                           <button
                             onClick={() => handleToggle(cheat)}
                             disabled={disabled}
-                            className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${
-                              disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-                            } ${isActive ? 'bg-amber-400' : 'bg-white/10'}`}
+                            className={`relative w-10 h-5 rounded-full transition-all flex-shrink-0 ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                            style={{ background: isActive ? '#FF6B00' : 'rgba(255,255,255,0.1)', boxShadow: isActive ? '0 0 8px rgba(255,107,0,0.4)' : 'none' }}
                           >
                             <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${isActive ? 'translate-x-5' : ''}`} />
                           </button>
@@ -418,7 +426,7 @@ export default function TrainerView({ companion }: Props) {
                               <span className="text-[10px] bg-white/10 text-white/40 px-1.5 py-0.5 rounded font-mono">{cheat.hotkey}</span>
                             )}
                             {locked && (
-                              <span className="text-[10px] bg-amber-400/10 text-amber-400 px-1.5 py-0.5 rounded font-bold">PRO</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'rgba(255,107,0,0.12)', color: '#FF8C42' }}>💀 COVEN</span>
                             )}
                           </div>
                           <div className="text-xs text-white/30 mt-0.5">{cheat.description}</div>
@@ -432,14 +440,16 @@ export default function TrainerView({ companion }: Props) {
                               value={valueInputs[cheat.id] ?? (cheat.defaultValue ?? '')}
                               onChange={e => setValueInputs(s => ({ ...s, [cheat.id]: e.target.value }))}
                               disabled={disabled}
-                              className="w-24 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs text-right focus:outline-none focus:border-amber-400/50 disabled:opacity-40"
+                              className="w-24 rounded-lg px-2 py-1.5 text-white text-xs text-right focus:outline-none disabled:opacity-40"
+                              style={{ background: 'rgba(255,107,0,0.07)', border: '1px solid rgba(255,107,0,0.15)' }}
                             />
                             <button
                               onClick={() => handleValueSet(cheat)}
                               disabled={disabled}
-                              className="text-xs bg-amber-400/10 hover:bg-amber-400/20 text-amber-400 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                              className="text-xs px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                              style={{ background: 'rgba(255,107,0,0.12)', color: '#FF8C42' }}
                             >
-                              Set
+                              Cast
                             </button>
                           </div>
                         )}
@@ -449,9 +459,10 @@ export default function TrainerView({ companion }: Props) {
                           <button
                             onClick={() => handleButton(cheat)}
                             disabled={disabled}
-                            className="text-xs bg-amber-400/10 hover:bg-amber-400/20 text-amber-400 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                            className="text-xs px-3 py-1.5 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                            style={{ background: 'rgba(255,107,0,0.12)', color: '#FF8C42' }}
                           >
-                            Activate
+                            Hex it
                           </button>
                         )}
                       </div>
@@ -465,15 +476,16 @@ export default function TrainerView({ companion }: Props) {
 
         {/* Pro upsell if free */}
         {!isPro && (
-          <div className="mx-4 mb-4 bg-amber-400/5 border border-amber-400/20 rounded-xl p-4 flex items-center gap-3">
-            <span className="text-2xl">👑</span>
+          <div className="mx-4 mb-4 rounded-xl p-4 flex items-center gap-3" style={{ background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.2)' }}>
+            <span className="text-2xl">💀</span>
             <div className="flex-1">
-              <div className="text-sm font-semibold text-amber-400">Unlock Pro Cheats</div>
-              <div className="text-xs text-white/40">Get unlimited time + 10x DP earning</div>
+              <div className="text-sm font-semibold" style={{ color: '#FF8C42' }}>Unlock Coven Spells</div>
+              <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Get unlimited time + 10x DP earning</div>
             </div>
             <button
               onClick={() => setView('pro')}
-              className="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-lg hover:bg-amber-300 transition-colors"
+              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+              style={{ background: '#FF6B00', color: '#000' }}
             >
               $4.49/mo
             </button>

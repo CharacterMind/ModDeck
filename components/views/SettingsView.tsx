@@ -43,18 +43,21 @@ export default function SettingsView() {
   return (
     <div className="h-full flex overflow-hidden">
       {/* Side nav */}
-      <div className="w-44 border-r border-white/5 p-3 flex-shrink-0">
-        <div className="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-2 py-2">Settings</div>
+      <div className="w-44 p-3 flex-shrink-0" style={{ borderRight: '1px solid rgba(255,107,0,0.1)' }}>
+        <div className="text-[10px] font-semibold uppercase tracking-widest px-2 py-2" style={{ color: 'rgba(255,107,0,0.4)' }}>🕷️ Settings</div>
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors mb-0.5 ${
-              tab === t.id
-                ? 'bg-white/10 text-white'
-                : t.id === 'danger' ? 'text-red-400/60 hover:text-red-400 hover:bg-red-400/5'
-                : 'text-white/50 hover:text-white hover:bg-white/5'
-            }`}
+            className="w-full text-left px-3 py-2 rounded-lg text-sm transition-all mb-0.5"
+            style={tab === t.id ? {
+              background: 'rgba(255,107,0,0.12)',
+              color: '#FF8C42',
+            } : t.id === 'danger' ? {
+              color: 'rgba(239,68,68,0.55)',
+            } : {
+              color: 'rgba(255,255,255,0.45)',
+            }}
           >
             {t.label}
           </button>
@@ -71,11 +74,16 @@ export default function SettingsView() {
             <div>
               <label className="block text-sm text-white/60 mb-3">Profile Picture</label>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-amber-400 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0"
+                  style={{ background: '#FF6B00', boxShadow: '0 0 15px rgba(255,107,0,0.4)' }}
+                >
                   {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-black font-black text-xl">{(user?.name ?? 'U').charAt(0).toUpperCase()}</span>
+                    <span className="text-black font-black text-xl">
+                      {(user?.name ?? 'U').replace(/([A-Z])/g, ' $1').trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('')}
+                    </span>
                   )}
                 </div>
                 <div className="flex flex-col gap-2">
@@ -106,28 +114,36 @@ export default function SettingsView() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 maxLength={32}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
+                className="w-full rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all"
+                style={{ background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.15)' }}
               />
-              <p className="text-white/20 text-xs mt-1">This is how you appear across ModDeck. Change it anytime.</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>This is how you appear across ModDeck. Change it anytime.</p>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm text-white/60 mb-2">Email</label>
+              <label className="block text-sm mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-400/50 transition-colors placeholder-white/20"
+                className="w-full rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none transition-all placeholder-white/20"
+                style={{ background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.15)' }}
               />
             </div>
 
             <button
               onClick={handleSave}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                saved ? 'bg-emerald-400/20 text-emerald-400 border border-emerald-400/30' : 'bg-amber-400 text-black hover:bg-amber-300'
-              }`}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+              style={saved ? {
+                background: 'rgba(74,222,128,0.15)',
+                color: '#4ade80',
+                border: '1px solid rgba(74,222,128,0.25)',
+              } : {
+                background: '#FF6B00',
+                color: '#000',
+              }}
             >
               {saved ? '✓ Saved' : 'Save changes'}
             </button>

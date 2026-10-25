@@ -57,8 +57,9 @@ function App() {
           {view === 'pro' && <ProView />}
           {view === 'settings' && <SettingsView />}
           {(view === 'ai' || view === 'pulse') && (
-            <div className="flex items-center justify-center h-full text-white/20 text-sm">
-              Coming soon
+            <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: 'rgba(255,107,0,0.3)' }}>
+              <div className="text-4xl">{view === 'ai' ? '🧙' : '🔮'}</div>
+              <div className="text-sm">{view === 'ai' ? 'Hex AI — summoning soon...' : 'Séance — awakening soon...'}</div>
             </div>
           )}
         </main>

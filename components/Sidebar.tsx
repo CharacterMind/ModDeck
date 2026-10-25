@@ -3,16 +3,27 @@
 import { useStore } from '@/lib/store';
 import { GAMES } from '@/data/games';
 import { useCompanion } from '@/hooks/useCompanion';
-import Image from 'next/image';
 
 const NAV = [
-  { id: 'home', label: 'Mods', icon: '⚡' },
-  { id: 'library', label: 'Library', icon: '📚' },
-  { id: 'pulse', label: 'Pulse', icon: '📡', badge: 'NEW' },
+  { id: 'home', label: 'Trainers', icon: '🎃' },
+  { id: 'library', label: 'Grimoire', icon: '📖' },
+  { id: 'pulse', label: 'Séance', icon: '🔮', badge: 'NEW' },
 ];
 
 interface Props {
   companion: ReturnType<typeof useCompanion>;
+}
+
+function getInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length > 1) {
+    return words.slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  }
+  const camelParts = name.replace(/([A-Z])/g, ' $1').trim().split(/\s+/);
+  if (camelParts.length > 1) {
+    return camelParts.slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  }
+  return name.slice(0, Math.min(2, name.length)).toUpperCase();
 }
 
 export default function Sidebar({ companion }: Props) {
@@ -27,14 +38,19 @@ export default function Sidebar({ companion }: Props) {
   }
 
   return (
-    <aside className="w-[160px] flex-shrink-0 bg-[#111111] border-r border-white/5 flex flex-col select-none">
+    <aside className="w-[160px] flex-shrink-0 border-r flex flex-col select-none" style={{ background: '#0f0800', borderColor: 'rgba(255,107,0,0.12)' }}>
       {/* Logo */}
-      <div className="px-4 py-4 border-b border-white/5">
+      <div className="px-4 py-4 border-b" style={{ borderColor: 'rgba(255,107,0,0.12)' }}>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-amber-400 rounded-md flex items-center justify-center text-black font-black text-xs">MD</div>
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center text-sm font-black"
+            style={{ background: '#FF6B00', color: '#000', boxShadow: '0 0 10px rgba(255,107,0,0.5)' }}
+          >
+            🎃
+          </div>
           <div>
-            <div className="text-white font-bold text-sm leading-none">MODDECK</div>
-            <div className="text-white/30 text-[10px] leading-none mt-0.5">Trainers & Mods for PC</div>
+            <div className="font-bold text-sm leading-none" style={{ color: '#FF8C42' }}>MODDECK</div>
+            <div className="text-[10px] leading-none mt-0.5" style={{ color: 'rgba(255,107,0,0.4)' }}>Spells &amp; Trainers</div>
           </div>
         </div>
       </div>
@@ -45,60 +61,67 @@ export default function Sidebar({ companion }: Props) {
           <button
             key={item.id}
             onClick={() => setView(item.id as any)}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
-              view === item.id
-                ? 'bg-white/10 text-white'
-                : 'text-white/50 hover:text-white hover:bg-white/5'
-            }`}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all"
+            style={view === item.id ? {
+              background: 'rgba(255,107,0,0.15)',
+              color: '#FF8C42',
+              boxShadow: 'inset 0 0 8px rgba(255,107,0,0.1)'
+            } : {
+              color: 'rgba(255,255,255,0.45)',
+            }}
           >
             <span className="text-base leading-none">{item.icon}</span>
             <span className="font-medium">{item.label}</span>
             {item.badge && (
-              <span className="ml-auto text-[9px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full">
+              <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#FF6B00', color: '#000' }}>
                 {item.badge}
               </span>
             )}
           </button>
         ))}
 
-        {/* AI button */}
+        {/* Mod AI */}
         <button
           onClick={() => setView('ai' as any)}
-          className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
-            view === 'ai'
-              ? 'bg-white/10 text-white'
-              : 'text-white/50 hover:text-white hover:bg-white/5'
-          }`}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all"
+          style={view === 'ai' ? {
+            background: 'rgba(155,89,182,0.2)',
+            color: '#c084fc',
+          } : {
+            color: 'rgba(255,255,255,0.45)',
+          }}
         >
-          <span className="text-base leading-none">🤖</span>
-          <span className="font-medium">Mod AI</span>
-          <span className="ml-auto text-[9px] font-bold bg-purple-500 text-white px-1.5 py-0.5 rounded-full">BETA</span>
+          <span className="text-base leading-none">🧙</span>
+          <span className="font-medium">Hex AI</span>
+          <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#9B59B6', color: '#fff' }}>BETA</span>
         </button>
 
-        {/* Pro button */}
+        {/* Pro */}
         {user?.plan !== 'pro' && (
           <button
             onClick={() => setView('pro')}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
-              view === 'pro'
-                ? 'bg-amber-400/20 text-amber-400'
-                : 'text-amber-400/70 hover:text-amber-400 hover:bg-amber-400/10'
-            }`}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all"
+            style={view === 'pro' ? {
+              background: 'rgba(255,107,0,0.2)',
+              color: '#FF8C42',
+            } : {
+              color: 'rgba(255,140,66,0.6)',
+            }}
           >
-            <span className="text-base leading-none">👑</span>
-            <span className="font-medium">ModDeck Pro</span>
+            <span className="text-base leading-none">💀</span>
+            <span className="font-medium">Coven Pro</span>
           </button>
         )}
       </nav>
 
       <div className="px-3 py-2">
-        <div className="h-px bg-white/5" />
+        <div className="h-px" style={{ background: 'rgba(255,107,0,0.08)' }} />
       </div>
 
       {/* My Games */}
       <div className="flex-1 overflow-y-auto px-2 pb-2">
-        <div className="px-2 py-1.5 text-[10px] font-semibold text-white/30 uppercase tracking-widest">
-          My Games ({myGames.length})
+        <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,107,0,0.4)' }}>
+          🦇 Haunted Games ({myGames.length})
         </div>
         <div className="space-y-0.5">
           {myGames.map(game => {
@@ -108,12 +131,10 @@ export default function Sidebar({ companion }: Props) {
               <button
                 key={game.id}
                 onClick={() => selectGame(game.id)}
-                className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md transition-colors group ${
-                  isActive ? 'bg-white/10' : 'hover:bg-white/5'
-                }`}
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md transition-all group"
+                style={isActive ? { background: 'rgba(255,107,0,0.12)' } : {}}
               >
-                {/* Game icon */}
-                <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-white/5">
+                <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <img
                     src={game.coverUrl}
                     alt={game.name}
@@ -123,11 +144,11 @@ export default function Sidebar({ companion }: Props) {
                     }}
                   />
                 </div>
-                <span className={`text-xs font-medium truncate ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}>
+                <span className="text-xs font-medium truncate" style={{ color: isActive ? '#FF8C42' : 'rgba(255,255,255,0.55)' }}>
                   {game.name}
                 </span>
                 {isInstalled && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" title="Installed" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#FF6B00' }} title="Installed" />
                 )}
               </button>
             );
@@ -136,35 +157,42 @@ export default function Sidebar({ companion }: Props) {
       </div>
 
       {/* Bottom: Settings + User */}
-      <div className="border-t border-white/5 p-2 space-y-0.5">
+      <div className="border-t p-2 space-y-0.5" style={{ borderColor: 'rgba(255,107,0,0.12)' }}>
         <button
           onClick={() => setView('settings')}
-          className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${
-            view === 'settings'
-              ? 'bg-white/10 text-white'
-              : 'text-white/50 hover:text-white hover:bg-white/5'
-          }`}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all"
+          style={view === 'settings' ? {
+            background: 'rgba(255,107,0,0.12)',
+            color: '#FF8C42',
+          } : {
+            color: 'rgba(255,255,255,0.45)',
+          }}
         >
-          <span className="text-base leading-none">⚙️</span>
+          <span className="text-base leading-none">🕷️</span>
           <span className="font-medium">Settings</span>
         </button>
 
-        {/* User chip */}
         {user && (
           <button
             onClick={() => setView('settings')}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md transition-all"
+            style={{ ':hover': { background: 'rgba(255,107,0,0.08)' } } as any}
           >
-            <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center text-black font-bold text-[10px] flex-shrink-0">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[9px] flex-shrink-0"
+              style={{ background: '#FF6B00', color: '#000', boxShadow: '0 0 8px rgba(255,107,0,0.5)' }}
+            >
               {user.avatarUrl ? (
                 <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover rounded-full" />
               ) : (
-                user.name.charAt(0).toUpperCase()
+                getInitials(user.name)
               )}
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-medium text-white/80 truncate">{user.name}</div>
-              <div className="text-[10px] text-white/30 truncate">{user.email || (user.plan === 'pro' ? '👑 Pro' : 'Free')}</div>
+              <div className="text-xs font-medium truncate" style={{ color: 'rgba(255,255,255,0.75)' }}>{user.name}</div>
+              <div className="text-[10px] truncate" style={{ color: 'rgba(255,107,0,0.5)' }}>
+                {user.email || (user.plan === 'pro' ? '💀 Coven' : 'Free')}
+              </div>
             </div>
           </button>
         )}
