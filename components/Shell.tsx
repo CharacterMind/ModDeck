@@ -13,6 +13,7 @@ import TrainerView from './views/TrainerView';
 import ProView from './views/ProView';
 import SettingsView from './views/SettingsView';
 import WelcomeModal from './WelcomeModal';
+import DailyLimitBanner from './DailyLimitBanner';
 
 function App() {
   const { view, user, setUser, hasSeenWelcome, setHasSeenWelcome } = useStore();
@@ -50,18 +51,21 @@ function App() {
     <div className="flex flex-col h-screen bg-[#0a0a0a] text-white overflow-hidden" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0a0a0a' }}>
       <div className="flex flex-1 overflow-hidden" style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
         <Sidebar companion={companion} />
-        <main className="flex-1 overflow-hidden" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-          {view === 'home' && <HomeView companion={companion} />}
-          {view === 'library' && <LibraryView companion={companion} />}
-          {view === 'trainer' && <TrainerView companion={companion} />}
-          {view === 'pro' && <ProView />}
-          {view === 'settings' && <SettingsView />}
-          {(view === 'ai' || view === 'pulse') && (
-            <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: 'rgba(255,107,0,0.3)' }}>
-              <div className="text-4xl">{view === 'ai' ? '🧙' : '🔮'}</div>
-              <div className="text-sm">{view === 'ai' ? 'Hex AI — summoning soon...' : 'Séance — awakening soon...'}</div>
-            </div>
-          )}
+        <main className="flex-1 overflow-hidden flex flex-col" style={{ flex: 1, overflow: 'hidden', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <DailyLimitBanner />
+          <div className="flex-1 overflow-hidden min-h-0" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
+            {view === 'home' && <HomeView companion={companion} />}
+            {view === 'library' && <LibraryView companion={companion} />}
+            {view === 'trainer' && <TrainerView companion={companion} />}
+            {view === 'pro' && <ProView />}
+            {view === 'settings' && <SettingsView />}
+            {(view === 'ai' || view === 'pulse') && (
+              <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: 'rgba(255,107,0,0.3)' }}>
+                <div className="text-4xl">{view === 'ai' ? '🧙' : '🔮'}</div>
+                <div className="text-sm">{view === 'ai' ? 'Hex AI — summoning soon...' : 'Séance — awakening soon...'}</div>
+              </div>
+            )}
+          </div>
         </main>
       </div>
       <StatusBar companion={companion} />
