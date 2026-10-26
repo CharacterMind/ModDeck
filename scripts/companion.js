@@ -179,7 +179,9 @@ async function findProcess(processes) {
 }
 
 async function launchViaSteam(steamAppId) {
-  await ps(`Start-Process "steam://rungameid/${steamAppId}"`).catch(() => {});
+  return new Promise(resolve => {
+    exec(`cmd /c start steam://rungameid/${steamAppId}`, () => resolve());
+  });
 }
 
 // ── HTTP server ───────────────────────────────────────────────────────────────
@@ -241,7 +243,7 @@ const server = http.createServer(async (req, res) => {
     // For now, derive it from the hardcoded Steam IDs we know
     const STEAM_IDS = {
       'supermarket-simulator': 2670630,
-      'supermarket-together': 1979840,
+      'supermarket-together': 2709570,
     };
     const appId = STEAM_IDS[gameId];
     if (!appId) return json(res, { ok: false, started: false, error: 'Unknown game' });
