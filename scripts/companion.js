@@ -15,10 +15,9 @@ const VERSION = '1.0.0';
 // ── State ─────────────────────────────────────────────────────────────────────
 let syncedGames = [];           // { gameId, name } from /sync
 let attached = null;            // { gameId, pid, name } when a game is open
-let scanAddresses = [];         // current candidate addresses (as BigInt)
-let frozenAddresses = [];       // addresses being frozen
-let freezeTimer = null;
-let frozenValue = null;
+// Named pools: each cheat group (e.g. 'money', 'restock') has its own scan/freeze state
+const scanPools = {};           // { [pool]: number[] }  — candidate addresses per pool
+const freezePools = {};         // { [pool]: { timer, value } }  — active freeze per pool
 
 // ── PowerShell helpers ────────────────────────────────────────────────────────
 function ps(script, timeoutMs = 8000) {
@@ -134,20 +133,23 @@ $addrs = New-Object System.Collections.Generic.List[long]
   return parseInt(out, 10) || 0;
 }
 
-function startFreeze(pid, addresses, value) {
-  stopFreeze();
-  frozenAddresses = addresses.slice(0, 50);
-  frozenValue = value;
-  freezeTimer = setInterval(() => {
-    if (!attached) { stopFreeze(); return; }
-    writeFloat(pid, frozenAddresses, frozenValue).catch(() => {});
+function startFreeze(pool, pid, addresses, value) {
+  stopFreeze(pool);
+  freezePools[pool] = { value };
+  freezePools[pool].timer = setInterval(() => {
+    if (!attached) { stopFreeze(pool); return; }
+    writeFloat(pid, addresses.slice(0, 50), value).catch(() => {});
   }, 500);
 }
 
-function stopFreeze() {
-  if (freezeTimer) { clearInterval(freezeTimer); freezeTimer = null; }
-  frozenAddresses = [];
-  frozenValue = null;
+function stopFreeze(pool) {
+  if (pool) {
+    if (freezePools[pool]) { clearInterval(freezePools[pool].timer); delete freezePools[pool]; }
+  } else {
+    // Stop all freeze pools
+    for (const p of Object.keys(freezePools)) { clearInterval(freezePools[p].timer); }
+    Object.keys(freezePools).forEach(p => delete freezePools[p]);
+  }
 }
 
 // ── Process detection ─────────────────────────────────────────────────────────
@@ -216,7 +218,8 @@ const server = http.createServer(async (req, res) => {
       attachedGameId: attached?.gameId ?? '',
       attachedPid: attached?.pid ?? 0,
       attachedName: attached?.name ?? '',
-      frozen: frozenAddresses.length,
+      frozen: Object.keys(freezePools).length,
+      frozenPools: Object.keys(freezePools),
       installedCount: syncedGames.length,
     });
   }
@@ -258,55 +261,58 @@ const server = http.createServer(async (req, res) => {
     }
     if (!found) return json(res, { found: false, error: 'Process not found' });
     attached = { gameId: body.gameId, pid: found.pid, name: found.name };
-    scanAddresses = [];
+    Object.keys(scanPools).forEach(p => delete scanPools[p]);
     stopFreeze();
     return json(res, { found: true, pid: found.pid, name: found.name, attached: true });
   }
 
   // POST /detach
   if (req.method === 'POST' && url === '/detach') {
-    stopFreeze();
+    stopFreeze();  // stop all pools
     attached = null;
-    scanAddresses = [];
+    Object.keys(scanPools).forEach(p => delete scanPools[p]);
     return json(res, { ok: true });
   }
 
-  // POST /scan { op: 'first'|'next'|'write'|'undo'|'reset', value?, freeze?, type? }
+  // POST /scan { op: 'first'|'next'|'write'|'undo'|'reset', value?, freeze?, type?, pool? }
+  // pool: named group (e.g. 'money', 'restock') — defaults to 'default'
   if (req.method === 'POST' && url === '/scan') {
     const body = await readBody(req);
     const { op, value, freeze } = body;
+    const pool = body.pool || 'default';
 
     if (!attached) return json(res, { ok: false, error: 'No process attached' });
     const pid = attached.pid;
 
     if (op === 'first') {
-      scanAddresses = await scanFloat(pid, value).catch(() => []);
-      const ready = scanAddresses.length > 0 && scanAddresses.length <= 10;
-      return json(res, { ok: true, counts: { float: scanAddresses.length }, bestType: 'float', ready });
+      scanPools[pool] = await scanFloat(pid, value).catch(() => []);
+      const ready = scanPools[pool].length > 0 && scanPools[pool].length <= 10;
+      return json(res, { ok: true, counts: { float: scanPools[pool].length }, bestType: 'float', ready });
     }
 
     if (op === 'next') {
-      if (!scanAddresses.length) return json(res, { ok: false, error: 'No scan in progress' });
-      scanAddresses = await narrowFloat(pid, scanAddresses, value).catch(() => []);
-      const ready = scanAddresses.length > 0 && scanAddresses.length <= 10;
-      return json(res, { ok: true, counts: { float: scanAddresses.length }, bestType: 'float', ready });
+      if (!scanPools[pool] || !scanPools[pool].length) return json(res, { ok: false, error: 'No scan in progress for pool: ' + pool });
+      scanPools[pool] = await narrowFloat(pid, scanPools[pool], value).catch(() => []);
+      const ready = scanPools[pool].length > 0 && scanPools[pool].length <= 10;
+      return json(res, { ok: true, counts: { float: scanPools[pool].length }, bestType: 'float', ready });
     }
 
     if (op === 'write') {
-      if (!scanAddresses.length) return json(res, { ok: false, error: 'No addresses to write' });
-      const written = await writeFloat(pid, scanAddresses, value).catch(() => 0);
-      if (freeze && written > 0) startFreeze(pid, scanAddresses, value);
+      const addrs = scanPools[pool] || [];
+      if (!addrs.length) return json(res, { ok: false, error: 'No addresses in pool: ' + pool });
+      const written = await writeFloat(pid, addrs, value).catch(() => 0);
+      if (freeze && written > 0) startFreeze(pool, pid, addrs, value);
       return json(res, { ok: written > 0, written });
     }
 
     if (op === 'undo') {
-      stopFreeze();
+      stopFreeze(pool);
       return json(res, { ok: true });
     }
 
     if (op === 'reset') {
-      scanAddresses = [];
-      stopFreeze();
+      delete scanPools[pool];
+      stopFreeze(pool);
       return json(res, { ok: true });
     }
 
