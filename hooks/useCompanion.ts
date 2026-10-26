@@ -116,19 +116,19 @@ export function useCompanion() {
       return await companionFetch('/attach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId, processes, waitSeconds: 18 }),
-      }, 22000);
+        body: JSON.stringify({ gameId, processes, waitSeconds: 90 }),
+      }, 95000);
     } catch {
       return { found: false, error: 'Companion offline' };
     }
   }, []);
 
-  const scan = useCallback(async (op: string, value?: number, freeze?: boolean, type?: string): Promise<ScanResult> => {
+  const scan = useCallback(async (op: string, value?: number, freeze?: boolean, type?: string, pool?: string): Promise<ScanResult> => {
     try {
       return await companionFetch('/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ op, value, freeze, type }),
+        body: JSON.stringify({ op, value, freeze, type, pool }),
       });
     } catch {
       return { ok: false, error: 'Companion offline' };
